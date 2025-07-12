@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* TIÊU ĐỀ MỖI PAGE */
+.section-title {
+  color: #c06252;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
