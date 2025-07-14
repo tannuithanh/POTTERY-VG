@@ -8,5 +8,59 @@ body {
   color: #c06252;
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+}
+
+/* Cứ bảng nào có nút thêm thì add class vô */
+.addButton {  
+  background-color: #c06252;
+  border-color: #c06252;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+
+.addButton:hover,
+.addButton:focus {
+  background-color: #a84f42; 
+  border-color: #a84f42 !important;
+  color: #fff !important;
+}
+
+/* Dùng cho tittle của component để nó responsive */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0px;
+  margin-bottom: 5px;
+}
+
+/* Global - Ghi đè màu nút OK toàn bộ modal */
+.ant-btn-primary {
+  background-color: #c06252 !important;
+  border-color: #c06252 !important;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: #a44e42 !important;
+  border-color: #a44e42 !important;
+}
+
+/* Bảng - màu nền header */
+.ant-table-thead > tr > th {
+  background-color: #c06252 !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+/* Hover dòng */
+.ant-table-tbody > tr:hover {
+  background-color: rgba(192, 98, 82, 0.05) !important;
+}
+
+
+.main-content-wrapper {
+  position: relative;
 }

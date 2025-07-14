@@ -21,12 +21,18 @@
       </a-layout-header>
 
       <!-- Content -->
+      <!-- Trong layout -->
       <a-layout-content style="margin: 16px">
         <AppBreadcrumb />
-        <div style="padding: 24px; background: #fff; min-height: 360px">
-          <router-view />
+        <div class="main-content-wrapper">
+          <FullScreenLoader v-if="isLoading" />
+          <div style="padding: 24px; background: #fff; min-height: 360px">
+            <router-view />
+          </div>
         </div>
       </a-layout-content>
+
+
 
       <!-- Footer -->
       <Footer />
@@ -45,14 +51,24 @@ import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
 } from '@ant-design/icons-vue'
+import { useRouter } from 'vue-router'
+import FullScreenLoader from '@/components/FullScreenLoader.vue'
 
+const isLoading = ref(false)
+const router = useRouter()
 const collapsed = ref(false)
 const isMobile = ref(false)
 
 function checkMobile() {
   isMobile.value = window.innerWidth < 768
 }
-
+router.beforeEach((to, from, next) => {
+  isLoading.value = true
+  next()
+})
+router.afterEach(() => {
+  setTimeout(() => (isLoading.value = false), 300)
+})
 onMounted(() => {
   checkMobile()
   window.addEventListener('resize', checkMobile)

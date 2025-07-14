@@ -11,21 +11,33 @@
           <span>Trang chủ</span>
         </router-link>
       </a-menu-item>
-      <a-menu-item key="forms">
-        <router-link to="/forms">
-          <HomeOutlined />
-          <span>Mẫu đăng ký</span>
-        </router-link>
-      </a-menu-item>
+      <a-sub-menu key="profile" :icon="h(IdcardOutlined)" title="Hồ sơ điện tử">
+        <a-menu-item key="profile-create">
+          <router-link to="/forms/create">Tạo hồ sơ điện tử</router-link>
+        </a-menu-item>
+        <a-menu-item key="profile-list">
+          <router-link to="/forms/list">Danh sách hồ sơ</router-link>
+        </a-menu-item>
+      </a-sub-menu>
+
+      <a-sub-menu key="news" :icon="h(ProfileOutlined)" title="Bảng tin">
+        <a-menu-item key="create_news">
+          <router-link to="/news/create_news">Tạo bảng tin</router-link>
+        </a-menu-item>
+        <a-menu-item key="news-list">
+          <router-link to="/news/list">Thông tin bảng tin</router-link>
+        </a-menu-item>
+      </a-sub-menu>
+
     </a-menu>
   </a-layout-sider>
 </template>
 
 
 <script setup>
-import { HomeOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined, IdcardOutlined, ProfileOutlined } from '@ant-design/icons-vue'
 import { useRoute } from 'vue-router'
-import { computed, ref } from 'vue'
+import { computed, ref, h } from 'vue'
 const collapsed = ref(false)
 const route = useRoute()
 
@@ -72,5 +84,4 @@ const activeKey = computed(() => {
 ::v-deep(.ant-menu-light .ant-menu-item:hover .anticon) {
   color: #c06252 !important;
 }
-
 </style>

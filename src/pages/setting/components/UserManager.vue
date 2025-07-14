@@ -1,1 +1,0 @@
-<template>quản lý nhân sự</template>
