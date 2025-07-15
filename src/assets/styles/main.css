@@ -64,3 +64,61 @@ body {
 .main-content-wrapper {
   position: relative;
 }
+
+.ant-card .ant-card-head {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  min-height: 56px;
+  margin-bottom: -1px;
+  padding: 0 24px;
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 600;
+  font-size: 16px;
+  background: #c06252;
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 8px 8px 0 0;
+}
+
+.ant-divider::before,
+.ant-divider::after {
+  border-top: 1px solid #c06252 !important;
+}
+.ant-divider {
+  color: #c06252 !important;
+}
+
+
+
+/* Đổi màu viền khi hover */
+.ant-input:hover,
+.ant-textarea:hover,
+.ant-select:not(.ant-select-disabled):hover .ant-select-selector,
+.ant-picker:hover {
+    border-color: #c06252 !important; /* Màu đỏ chủ đạo */
+}
+
+/* Đổi màu viền khi focus */
+.ant-input:focus,
+.ant-textarea:focus,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+    border-color: #c06252 !important;
+    box-shadow: 0 0 0 2px rgba(211, 32, 41, 0.2);
+}
+
+/* Đổi màu border default (nếu cần) */
+.ant-input,
+.ant-textarea,
+.ant-select .ant-select-selector,
+.ant-picker {
+    border-radius: 4px;
+    transition: all 0.3s;
+    border-color: #d9d9d9;
+}
+
+/* Màu của caret (dấu nhấp nháy trong input) */
+.ant-input,
+.ant-textarea {
+    caret-color: #c06252;
+}

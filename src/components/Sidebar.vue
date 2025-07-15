@@ -12,8 +12,8 @@
         </router-link>
       </a-menu-item>
       <a-sub-menu key="profile" :icon="h(IdcardOutlined)" title="Hồ sơ điện tử">
-        <a-menu-item key="profile-create">
-          <router-link to="/forms/create">Tạo hồ sơ điện tử</router-link>
+        <a-menu-item key="forms_create">
+          <router-link to="/forms_create">Tạo hồ sơ điện tử</router-link>
         </a-menu-item>
         <a-menu-item key="profile-list">
           <router-link to="/forms/list">Danh sách hồ sơ</router-link>
@@ -22,7 +22,7 @@
 
       <a-sub-menu key="news" :icon="h(ProfileOutlined)" title="Bảng tin">
         <a-menu-item key="create_news">
-          <router-link to="/news/create_news">Tạo bảng tin</router-link>
+          <router-link to="/create_news">Tạo bảng tin</router-link>
         </a-menu-item>
         <a-menu-item key="news-list">
           <router-link to="/news/list">Thông tin bảng tin</router-link>

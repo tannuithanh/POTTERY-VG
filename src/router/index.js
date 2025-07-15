@@ -11,8 +11,8 @@ import UserManager from '@/pages/setting/components/user_manager/index.vue'
 import DepartmentManager from '@/pages/setting/components/department_manager/index.vue'
 //Quản lý bảng tin
 import News from '@/pages/setting/components/news_manager/index.vue'
-import NewsLayout from '@/pages/news/NewsLayout.vue'
-import CreateNews from '@/pages/news/components/CreateNews.vue'
+import CreateNews from '@/pages/news/CreateNews.vue'
+import LeaveForm from '@/pages/forms/leaveForm/LeaveForm.vue'
 const routes = [
   {
     path: '/',
@@ -29,6 +29,10 @@ const routes = [
         name: 'formsLayout',
         component: FormLayouts,
         meta: { title: 'Mẫu đăng ký' }
+      },
+      {
+        path: '/settings',
+        redirect: '/settings/user_manager'
       },
       {
         path: '/settings',
@@ -62,18 +66,24 @@ const routes = [
         meta: { title: 'Thông tin người dùng' }
       },
       {
-        path: '/news',
-        name: 'news',
-        component: NewsLayout,
-        meta: { title: 'Bảng tin' },
-        children: [
+        path: '/create_news',
+        name: 'createNews',
+        component: CreateNews,
+        meta: { title: 'Tạo bảng tin' }
+      },
+      {
+        path: '/forms_create',
+        name: 'formCreate',
+        component: FormLayouts,
+        meta: { title: 'Tạo hồ sơ điện tử' },
+          children: [
             {
-              path: 'create_news',
-              name: 'createNews',
-              component: CreateNews,
-              meta: { title: 'Tạo bảng tin' }
+              path: 'leave_form',
+              name: 'leave_Form',
+              component: LeaveForm,
+              meta: { title: 'Biểu mẫu giấy ra vào cổng' },
             },
-        ]
+          ]
       },
     ]
   }

@@ -12,7 +12,7 @@
 
                 <template #overlay>
                     <a-menu class="custom-dropdown-menu">
-                        <a-menu-item key="1" :to="'/settings'">
+                        <a-menu-item :to="'/settings'">
                             <template #icon>
                                 <SettingOutlined />
                             </template>
