@@ -13,6 +13,7 @@ import DepartmentManager from '@/pages/setting/components/department_manager/ind
 import News from '@/pages/setting/components/news_manager/index.vue'
 import CreateNews from '@/pages/news/CreateNews.vue'
 import LeaveForm from '@/pages/forms/leaveForm/LeaveForm.vue'
+import LoginPage from '@/pages/login/LoginPage.vue'
 const routes = [
   {
     path: '/',
@@ -86,6 +87,12 @@ const routes = [
           ]
       },
     ]
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginPage,
+    meta: { title: 'Đăng nhập' }
   }
 ]
 

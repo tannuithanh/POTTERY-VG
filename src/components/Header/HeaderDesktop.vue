@@ -5,8 +5,8 @@
                 <a class="header__user" @click.prevent>
                     <a-avatar :size="32" src="https://i.pravatar.cc/150?img=3" />
                     <div class="user-meta">
-                        <div class="header__username">Chookie</div>
-                        <div class="header__position">Chuyên viên quản lý phần mềm</div>
+                        <div class="header__username">{{ authStore.user?.name }}</div>
+                        <div class="header__position">{{ authStore.user?.position_detail }}</div>
                     </div>
                 </a>
 
@@ -44,10 +44,34 @@ import {
     InfoCircleOutlined,
     LogoutOutlined
 } from '@ant-design/icons-vue'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+import { notification } from 'ant-design-vue'
+import { onMounted } from 'vue'
 
-function logout() {
-    console.log('Logging out...')
+const authStore = useAuthStore()
+console.log(authStore.user)
+const router = useRouter()
+
+const logout = async () => {
+    try {
+        await authStore.logout()
+        notification.success({
+            message: 'Đăng xuất',
+            description: 'Bạn đã đăng xuất thành công.'
+        })
+        router.push('/login') // điều hướng về trang login
+    } catch (error) {
+        notification.error({
+            message: 'Lỗi đăng xuất',
+            description: error?.response?.data?.message || 'Không thể đăng xuất'
+        })
+    }
 }
+
+onMounted(async() => {
+  await authStore.fetchMe()
+})
 </script>
 
 <style scoped>

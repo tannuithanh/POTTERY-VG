@@ -6,12 +6,12 @@
             <a-row :gutter="16">
                 <a-col :span="12">
                     <a-form-item label="Mã nhân viên">
-                        <a-input v-model:value="formState.employeeCode" />
+                        <a-input v-model:value="formState.msnv" readonly/>
                     </a-form-item>
                 </a-col>
                 <a-col :span="12">
                     <a-form-item label="Họ và tên">
-                        <a-input v-model:value="formState.fullName" />
+                        <a-input v-model:value="formState.fullName" readonly />
                     </a-form-item>
                 </a-col>
             </a-row>
@@ -19,12 +19,12 @@
             <a-row :gutter="16">
                 <a-col :span="12">
                     <a-form-item label="Phòng ban">
-                        <a-input v-model:value="formState.department" />
+                        <a-input v-model:value="formState.department" readonly/>
                     </a-form-item>
                 </a-col>
                 <a-col :span="12">
                     <a-form-item label="Chức vụ">
-                        <a-input v-model:value="formState.position" />
+                        <a-input v-model:value="formState.position" readonly/>
                     </a-form-item>
                 </a-col>
             </a-row>
@@ -91,6 +91,9 @@
 import { ref } from 'vue'
 import ReviewLeaveForm from './ReviewLeaveForm.vue'
 import dayjs from 'dayjs'
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+const userAuth = useAuthStore()
 
 const showPreview = ref(false)
 
@@ -121,7 +124,16 @@ const submitForm = () => {
     console.log('Form data:', formState.value)
     showPreview.value = true
 }
-
+onMounted(async() => {
+  await userAuth.fetchMe()
+  const user = userAuth.user
+  if (user) {
+    formState.value.msnv = user.msnv || ''
+    formState.value.fullName = user.name || ''
+    formState.value.department = user.department?.name || ''
+    formState.value.position = user.position?.name || ''
+  }
+})
 </script>
 
 <style scoped>

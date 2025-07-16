@@ -32,13 +32,13 @@
                     </a-menu>
 
                     <div class="mobile-user">
-                        <div class="user-name">Admin User</div>
-                        <div class="user-email">tannguyen@vinhgiapottery.com</div>
+                        <div class="user-name">{{ authStore.user?.name }}</div>
+                        <div class="user-email">{{ authStore.user?.position_detail }}</div>
                         <div class="user-actions">
                             <a-button type="text" block>
                                 <SettingOutlined /> Change Password
                             </a-button>
-                            <a-button type="primary" danger block>
+                            <a-button type="primary" danger block @click="logout">
                                 <LogoutOutlined /> Log out
                             </a-button>
                         </div>
@@ -58,13 +58,40 @@ import {
     UserOutlined
 } from '@ant-design/icons-vue'
 import { ref } from 'vue'
-
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+import { notification } from 'ant-design-vue'
+import { onMounted } from 'vue'
 const drawerVisible = ref(false)
 const openKeys = ref([])
 
 function onOpenChange(keys) {
     openKeys.value = keys
 }
+
+
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+const logout = async () => {
+    try {
+        await authStore.logout()
+        notification.success({
+            message: 'Đăng xuất',
+            description: 'Bạn đã đăng xuất thành công.'
+        })
+        router.push('/login') // điều hướng về trang login
+    } catch (error) {
+        notification.error({
+            message: 'Lỗi đăng xuất',
+            description: error?.response?.data?.message || 'Không thể đăng xuất'
+        })
+    }
+}
+onMounted(async() => {
+  await authStore.fetchMe()
+})
 </script>
 
 
