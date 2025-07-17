@@ -32,6 +32,7 @@
                     </a-menu>
 
                     <div class="mobile-user">
+                        <a-avatar :size="80" :src="avatar" />
                         <div class="user-name">{{ authStore.user?.name }}</div>
                         <div class="user-email">{{ authStore.user?.position_detail }}</div>
                         <div class="user-actions">
@@ -61,7 +62,9 @@ import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { notification } from 'ant-design-vue'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
+import { resolveStoragePath } from '@/utils/storage'
+
 const drawerVisible = ref(false)
 const openKeys = ref([])
 
@@ -73,6 +76,9 @@ function onOpenChange(keys) {
 
 const authStore = useAuthStore()
 const router = useRouter()
+const avatar = computed(() =>
+  authStore.user?.avatar ? resolveStoragePath(authStore.user.avatar) : ''
+)
 
 const logout = async () => {
     try {

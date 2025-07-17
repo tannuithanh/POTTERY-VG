@@ -16,6 +16,20 @@
                     <router-link :to="{ name: 'departmentManager' }">Quản lý bộ phận</router-link>
                 </a-menu-item>
 
+                <a-menu-item key="module_manager">
+                    <template #icon>
+                        <ControlOutlined />
+                    </template>
+                    <router-link :to="{ name: 'moduleManager' }">Quản lý chức năng</router-link>
+                </a-menu-item>
+                
+                <a-menu-item key="role_permission">
+                    <template #icon>
+                        <TeamOutlined />
+                    </template>
+                    <router-link :to="{ name: 'rolePermissionManager' }">Quản lý vai trò & phân quyền</router-link>
+                </a-menu-item>
+
                 <a-menu-item key="gatepass">
                     <template #icon>
                         <FileProtectOutlined />
@@ -45,7 +59,8 @@ import {
     UserOutlined,
     ApartmentOutlined,
     FileProtectOutlined,
-    ProfileOutlined
+    ProfileOutlined,
+    ControlOutlined
 } from '@ant-design/icons-vue'
 
 import { useRoute } from 'vue-router'

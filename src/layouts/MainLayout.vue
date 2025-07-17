@@ -67,7 +67,7 @@ router.beforeEach((to, from, next) => {
   next()
 })
 router.afterEach(() => {
-  setTimeout(() => (isLoading.value = false), 300)
+  setTimeout(() => (isLoading.value = false), 600)
 })
 onMounted(() => {
   checkMobile()

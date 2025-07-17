@@ -6,12 +6,12 @@
             <a-row :gutter="16">
                 <a-col :span="12">
                     <a-form-item label="Mã nhân viên">
-                        <a-input v-model:value="formState.msnv" readonly/>
+                        <a-input v-model:value="formState.msnv" :disabled="true" />
                     </a-form-item>
                 </a-col>
                 <a-col :span="12">
                     <a-form-item label="Họ và tên">
-                        <a-input v-model:value="formState.fullName" readonly />
+                        <a-input v-model:value="formState.fullName" :disabled="true" />
                     </a-form-item>
                 </a-col>
             </a-row>
@@ -19,12 +19,12 @@
             <a-row :gutter="16">
                 <a-col :span="12">
                     <a-form-item label="Phòng ban">
-                        <a-input v-model:value="formState.department" readonly/>
+                        <a-input v-model:value="formState.department" :disabled="true" />
                     </a-form-item>
                 </a-col>
                 <a-col :span="12">
                     <a-form-item label="Chức vụ">
-                        <a-input v-model:value="formState.position" readonly/>
+                        <a-input v-model:value="formState.position" :disabled="true" />
                     </a-form-item>
                 </a-col>
             </a-row>
@@ -59,7 +59,8 @@
 
             <!-- Ngày tạo -->
             <a-form-item label="Ngày tạo phiếu" :label-col="{ span: 1.5 }" :wrapper-col="{ span: 22.5 }">
-                <a-date-picker v-model:value="formState.createdAt" format="DD/MM/YYYY" style="width: 100%" />
+                <a-date-picker v-model:value="formState.createdAt" format="DD/MM/YYYY" style="width: 100%"
+                    :value-format="'YYYY-MM-DD'" :disabled="true" />
             </a-form-item>
 
 
@@ -105,7 +106,7 @@ const formState = ref({
     fromDate: dayjs().hour(7).minute(30).second(0),
     toDate: dayjs().hour(16).minute(30).second(0),
     reason: '',
-    createdAt: null,
+    createdAt: dayjs().format('YYYY-MM-DD'),
     manager: '',
 })
 
@@ -124,15 +125,15 @@ const submitForm = () => {
     console.log('Form data:', formState.value)
     showPreview.value = true
 }
-onMounted(async() => {
-  await userAuth.fetchMe()
-  const user = userAuth.user
-  if (user) {
-    formState.value.msnv = user.msnv || ''
-    formState.value.fullName = user.name || ''
-    formState.value.department = user.department?.name || ''
-    formState.value.position = user.position?.name || ''
-  }
+onMounted(async () => {
+    await userAuth.fetchMe()
+    const user = userAuth.user
+    if (user) {
+        formState.value.msnv = user.msnv || ''
+        formState.value.fullName = user.name || ''
+        formState.value.department = user.department?.name || ''
+        formState.value.position = user.position?.name || ''
+    }
 })
 </script>
 

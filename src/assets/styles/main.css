@@ -122,3 +122,28 @@ body {
 .ant-textarea {
     caret-color: #c06252;
 }
+
+
+
+/* Tùy chỉnh màu chính và border cho phân trang */
+
+
+.ant-pagination-item-active {
+  border-color: #c06252 !important;
+  color: black !important
+}
+
+.ant-pagination-item:hover,
+.ant-pagination-prev:hover,
+.ant-pagination-next:hover {
+  border-color: #c06252 !important;
+  color: #c06252 !important;
+}
+
+.ant-pagination .ant-pagination-item-active a {
+  color: #c06252;
+}
+
+.ant-pagination .ant-pagination-item-active:hover a{
+  color: #c06252;
+}

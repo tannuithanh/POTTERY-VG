@@ -9,11 +9,16 @@ import ProfileLayouts from '@/pages/profile/ProfileLayouts.vue'
 import UserManager from '@/pages/setting/components/user_manager/index.vue'
 //Quản lý phòng ban
 import DepartmentManager from '@/pages/setting/components/department_manager/index.vue'
+//Quản lý chức năng
+import ModuleManager from '@/pages/setting/components/module_manager/index.vue'
+//Quản lý vai trò và phân quyền
+import RolePermissionManager from '@/pages/setting/components/role_permission_manager/index.vue'
 //Quản lý bảng tin
 import News from '@/pages/setting/components/news_manager/index.vue'
 import CreateNews from '@/pages/news/CreateNews.vue'
 import LeaveForm from '@/pages/forms/leaveForm/LeaveForm.vue'
 import LoginPage from '@/pages/login/LoginPage.vue'
+
 const routes = [
   {
     path: '/',
@@ -41,6 +46,12 @@ const routes = [
         meta: { title: 'Cài đặt hệ thống' },
         children: [
             {
+              path: 'role_permission_manager',
+              name: 'rolePermissionManager',
+              component: RolePermissionManager,
+              meta: { title: 'Quản lý phân quyền và vai trò' }
+            },
+            {
               path: 'user_manager',
               name: 'userManager',
               component: UserManager,
@@ -51,6 +62,12 @@ const routes = [
               name: 'departmentManager',
               component: DepartmentManager,
               meta: { title: 'Quản lý phòng ban' }
+            },
+            {
+              path: 'module_manager',
+              name: 'moduleManager',
+              component: ModuleManager,
+              meta: { title: 'Quản lý chức năng' }
             },
             {
               path: 'news_manager',

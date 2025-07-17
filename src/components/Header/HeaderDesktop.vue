@@ -3,7 +3,7 @@
         <div class="header-desktop">
             <a-dropdown placement="bottomRight" trigger="click">
                 <a class="header__user" @click.prevent>
-                    <a-avatar :size="32" src="https://i.pravatar.cc/150?img=3" />
+                    <a-avatar :size="32" :src="avatar" />
                     <div class="user-meta">
                         <div class="header__username">{{ authStore.user?.name }}</div>
                         <div class="header__position">{{ authStore.user?.position_detail }}</div>
@@ -47,10 +47,11 @@ import {
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { notification } from 'ant-design-vue'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
+import { resolveStoragePath } from '@/utils/storage'
 
 const authStore = useAuthStore()
-console.log(authStore.user)
+
 const router = useRouter()
 
 const logout = async () => {
@@ -68,6 +69,9 @@ const logout = async () => {
         })
     }
 }
+const avatar = computed(() =>
+  authStore.user?.avatar ? resolveStoragePath(authStore.user.avatar) : ''
+)
 
 onMounted(async() => {
   await authStore.fetchMe()

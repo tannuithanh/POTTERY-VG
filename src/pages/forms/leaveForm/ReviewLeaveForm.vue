@@ -87,6 +87,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { formatDateTime } from '@/utils/formatDate'
 const props = defineProps({
     visible: Boolean,
     data: Object,
@@ -95,14 +96,8 @@ const emit = defineEmits(['update:visible'])
 
 const close = () => emit('update:visible', false)
 
-const formatDate = (raw) => {
-    if (!raw) return ''
-    const date = new Date(raw)
-    const pad = (n) => n.toString().padStart(2, '0')
-    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`
-}
-const fromDateFormatted = computed(() => formatDate(props.data?.fromDate))
-const toDateFormatted = computed(() => formatDate(props.data?.toDate))
+const fromDateFormatted = computed(() => formatDateTime(props.data?.fromDate))
+const toDateFormatted = computed(() => formatDateTime(props.data?.toDate))
 
 </script>
 

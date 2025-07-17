@@ -1,12 +1,12 @@
 import axios from 'axios'
+import { apiUrl } from '@/utils/env' // 👈 dùng biến môi trường đã tách sẵn
 
-// ⚙️ Tạo instance riêng
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api', // bạn sửa theo env
+  baseURL: apiUrl,
   timeout: 10000
 })
 
-// 🧱 Gắn interceptor nếu cần (ví dụ gắn token từ localStorage)
+// 🧱 Gắn token từ localStorage
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token')
