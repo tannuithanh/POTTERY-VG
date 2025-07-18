@@ -7,8 +7,7 @@
     <a-table :columns="columns" :dataSource="roles" rowKey="id" bordered @rowClick="onSelect">
       <template #action="{ record }">
         <TableActionButtons :showEdit="true" :showDelete="true" :showView="false" @edit="$emit('edit', record)"
-          @delete="$emit('delete', record.id, record.name)" />
-
+          @delete="$emit('delete', record)" />
       </template>
     </a-table>
   </a-card>
@@ -16,6 +15,8 @@
 
 <script setup>
 import TableActionButtons from '@/components/common/TableActionButtons.vue'
+
+
 const props = defineProps({ roles: Array })
 const emit = defineEmits(['create', 'edit', 'delete', 'select'])
 

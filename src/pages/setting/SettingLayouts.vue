@@ -22,15 +22,25 @@
                     </template>
                     <router-link :to="{ name: 'moduleManager' }">Quản lý chức năng</router-link>
                 </a-menu-item>
-                
+
                 <a-menu-item key="role_permission">
                     <template #icon>
-                        <TeamOutlined />
+                        <SafetyOutlined />
                     </template>
-                    <router-link :to="{ name: 'rolePermissionManager' }">Quản lý vai trò & phân quyền</router-link>
+                    <router-link :to="{ name: 'rolePermissionManager' }">Quản lý vai trò & Quyền chức năng</router-link>
                 </a-menu-item>
 
-                <a-menu-item key="gatepass">
+                <a-menu-item key="permission_assign">
+                    <template #icon>
+                        <KeyOutlined />
+                    </template>
+                    <router-link :to="{ name: 'Decentralization' }">Quản lý phân quyền</router-link>
+                </a-menu-item>
+
+
+
+
+                <!-- <a-menu-item key="gatepass">
                     <template #icon>
                         <FileProtectOutlined />
                     </template>
@@ -42,7 +52,7 @@
                         <ProfileOutlined />
                     </template>
                     <router-link :to="{ name: 'newsManager' }">Cài đặt bản tin</router-link>
-                </a-menu-item>
+                </a-menu-item> -->
             </a-menu>
         </a-layout-header>
 
@@ -60,7 +70,9 @@ import {
     ApartmentOutlined,
     FileProtectOutlined,
     ProfileOutlined,
-    ControlOutlined
+    ControlOutlined,
+    SafetyOutlined,
+    KeyOutlined
 } from '@ant-design/icons-vue'
 
 import { useRoute } from 'vue-router'
