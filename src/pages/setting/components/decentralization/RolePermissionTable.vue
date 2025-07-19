@@ -2,69 +2,99 @@
     <a-card>
         <div class="card-header flex justify-between items-center mb-4">
             <div class="section-title text-lg font-semibold">Danh sách người dùng phân quyền</div>
-            <a-button class="addButton" type="primary" @click="openCreateModal">+ Phân quyền người dùng</a-button>
+            <a-button class="addButton" type="primary" @click="openCreateModal">
+                + Phân quyền người dùng
+            </a-button>
         </div>
 
-        <a-table :columns="columns" :dataSource="data" rowKey="id" bordered>
-            <template #action="{ record }">
-                <TableActionButtons :showEdit="true" :showDelete="true" :showView="false" @edit="$emit('edit', record)"
-                    @delete="handleDelete(record)" />
-            </template>
+        <a-table :dataSource="userRoleList" rowKey="id" bordered>
+            <a-table-column title="Vai trò" dataIndex="role_name" key="role_name" />
+            <a-table-column title="Tên người dùng" dataIndex="user_name" key="user_name" />
+            <a-table-column title="Thao tác" key="action">
+                <template #default="{ record }">
+                    <TableActionButtons :showView="false" :showEdit="false" :showSave="false" :showCancel="false"
+                        :showDelete="true" @delete="handleDelete(record)" />
+                </template>
+            </a-table-column>
+
         </a-table>
+
+        <RolePermissionModal v-model:visible="showUserModal" :roles="roles" :users="users" @submit="handleAssign" />
     </a-card>
-    <RolePermissionModal v-model:visible="showUserModal" :roles="roles" :users="users" @submit="handleAssign" />
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import TableActionButtons from '@/components/common/TableActionButtons.vue'
+import { ref, onMounted } from 'vue'
 import RolePermissionModal from './RolePermissionModal.vue'
-import { message } from 'ant-design-vue'
+import permissionService from '@/services/permissionService'
+import { notification, Modal } from 'ant-design-vue'
+import TableActionButtons from '@/components/common/TableActionButtons.vue'
 
 // Props
-const props = defineProps({
-    data: Array,
+defineProps({
     roles: Array,
     users: Array
 })
 
-// Emits
-const emit = defineEmits(['edit', 'delete', 'submit'])
-
-// Columns
-// const columns = [
-//     {
-//         title: 'Người dùng',
-//         dataIndex: 'userName',
-//         key: 'userName'
-//     },
-//     {
-//         title: 'Vai trò',
-//         dataIndex: 'roleName',
-//         key: 'roleName'
-//     },
-//     {
-//         title: 'Hành động',
-//         key: 'action',
-//         slots: { customRender: 'action' }
-//     }
-// ]
-
-// Modal state
+const userRoleList = ref([])
 const showUserModal = ref(false)
 
-// Modal logic
+// Gọi khi mở modal
 const openCreateModal = () => {
     showUserModal.value = true
 }
 
-const handleAssign = (formData) => {
-    emit('submit', formData)
-    showUserModal.value = false
+// Gọi API danh sách
+const fetchUserRoles = async () => {
+    const res = await permissionService.getAllDataUserRole()
+    userRoleList.value = res.data
 }
 
-// Delete
-const handleDelete = (record) => {
-    emit('delete', record)
+onMounted(fetchUserRoles)
+
+// ✅ Xử lý submit từ Modal
+const handleAssign = async (formData) => {
+    const { role_id, user_ids } = formData
+
+    try {
+        await Promise.all(
+            user_ids.map(user_id =>
+                permissionService.addUserRole({ role_id, user_id })
+            )
+        )
+
+        notification.success({ message: 'Thành công', description: 'Phân quyền thành công' })
+        showUserModal.value = false
+        await fetchUserRoles()
+    } catch (err) {
+        notification.error({ message: 'Lỗi', description: err?.response?.data?.message })
+    }
 }
+
+// Delete logic (nếu có)
+const handleDelete = (record) => {
+  Modal.confirm({
+    title: 'Xác nhận xoá phân quyền?',
+    content: `Bạn có chắc chắn muốn xoá vai trò "${record.role_name}" khỏi người dùng "${record.user_name}"?`,
+    okText: 'Xoá',
+    okType: 'danger',
+    cancelText: 'Huỷ',
+    async onOk() {
+      try {
+        await permissionService.deleteUserRoll(record.id)
+        notification.success({
+          message: 'Xoá thành công',
+          description: `${record.user_name} đã được gỡ vai trò "${record.role_name}".`
+        })
+        await fetchUserRoles() // Gọi lại danh sách
+      } catch (err) {
+        notification.error({
+          message: 'Lỗi',
+          description: 'Không thể xoá phân quyền.'
+        })
+      }
+    }
+  })
+}
+
 </script>

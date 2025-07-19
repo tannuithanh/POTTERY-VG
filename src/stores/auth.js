@@ -5,6 +5,7 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: localStorage.getItem("access_token") || null,
     user: null,
+    modules: []
   }),
 
   actions: {
@@ -20,6 +21,7 @@ export const useAuthStore = defineStore("auth", {
       // 👤 Lấy user
       const me = await api.get("/me");
       this.user = me.data;
+      this.modules = me.data.modules || [];
     },
 
     // 🔐 Tải lại thông tin user (nếu đã có token)

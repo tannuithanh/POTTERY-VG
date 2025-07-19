@@ -27,7 +27,7 @@ import { useAuthStore } from '@/stores/auth'
 import { onMounted } from 'vue'
 
 const authStore = useAuthStore()
-
+console.log(authStore)
 onMounted(async () => {
   await authStore.fetchMe()
 })

@@ -1,18 +1,9 @@
 <template>
   <div>
     <ModuleSearch @search="handleSearch" />
-    <ModuleTable
-      :data="modules"
-      @edit="handleEdit"
-      @delete="handleDelete"
-      @create="handleCreate"
-      @refresh="fetchModules"
-    />
-    <ModuleModal
-      v-model:visible="showModal"
-      :record="selectedRecord"
-      @success="fetchModules"
-    />
+    <ModuleTable :data="modules" @edit="handleEdit" @delete="handleDelete" @create="handleCreate"
+      @refresh="fetchModules" />
+    <ModuleModal v-model:visible="showModal" :record="selectedRecord" @success="fetchModules" />
   </div>
 </template>
 

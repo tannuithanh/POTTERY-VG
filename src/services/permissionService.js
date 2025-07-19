@@ -28,6 +28,22 @@ const permissionService = {
   updatePermission(data) {
     return api.post("/permissions/update-role-permission", data);
   },
+
+  // Lấy toàn bộ danh sách người dùng đã được phân quyền
+  getAllDataUserRole() {
+    return api.get("/user-roles");
+  },
+
+  // Thêm quyền cho người dùng
+  addUserRole(data) {
+    return api.post("/add-user-roles", data);
+  },
+
+
+  deleteUserRoll(id) {
+    return api.delete(`/user-roles/${id}`)
+  }
+
 };
 
 export default permissionService;

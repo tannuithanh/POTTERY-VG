@@ -105,6 +105,8 @@ const columns = [
     { title: 'STT', dataIndex: 'index', customRender: ({ index }) => index + 1 },
     { title: 'Họ và tên', dataIndex: 'name' },
     { title: 'Mã số nhân viên', dataIndex: 'msnv' },
+    { title: 'Số điện thoại', dataIndex: 'phone' },
+    { title: 'Địa chỉ', dataIndex: 'address' },
     { title: 'Chức vụ', dataIndex: ['position', 'name'] },
     { title: 'Chức vụ chi tiết', dataIndex: 'position_detail' },
     { title: 'Mail', dataIndex: 'email' },

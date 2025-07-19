@@ -2,43 +2,62 @@
     <a-modal :open="modelValue" :title="isEdit ? 'Cập nhật nhân sự' : 'Thêm nhân sự'" @ok="handleSubmit"
         @cancel="emit('update:modelValue', false)" ok-text="Lưu" cancel-text="Hủy" :confirm-loading="loading">
         <a-form layout="vertical" :model="form">
-            <a-form-item label="Họ và tên">
-                <a-input v-model:value="form.name" placeholder="Nhập họ và tên" />
-            </a-form-item>
-            <a-form-item label="Mã số nhân viên">
-                <a-input v-model:value="form.msnv" placeholder="Mã số nhân viên" />
-            </a-form-item>
+            <a-row :gutter="16">
+                <!-- Cột trái -->
+                <a-col :span="12">
+                    <a-form-item label="Họ và tên">
+                        <a-input v-model:value="form.name" placeholder="Nhập họ và tên" />
+                    </a-form-item>
 
-            <a-form-item label="Chức vụ">
-                <a-select v-model:value="form.position_id"
-                    :options="positions.map(p => ({ label: p.name, value: p.id }))" placeholder="Chọn chức vụ" />
-            </a-form-item>
+                    <a-form-item label="Mã số nhân viên">
+                        <a-input v-model:value="form.msnv" placeholder="Mã số nhân viên" />
+                    </a-form-item>
 
+                    <a-form-item label="Số điện thoại" name="phone">
+                        <a-input v-model:value="form.phone" placeholder="Nhập số điện thoại" />
+                    </a-form-item>
 
-            <a-form-item label="Mô tả chức vụ">
-                <a-input v-model:value="form.position_detail" placeholder="Nhập mô tả" />
-            </a-form-item>
+                    <a-form-item label="Địa chỉ" name="address">
+                        <a-input v-model:value="form.address" placeholder="Nhập địa chỉ" />
+                    </a-form-item>
 
-            <a-form-item label="Mail">
-                <a-input v-model:value="form.email" placeholder="example@company.com" />
-            </a-form-item>
+                    <a-form-item label="Mail">
+                        <a-input v-model:value="form.email" placeholder="example@company.com" />
+                    </a-form-item>
+                </a-col>
 
-            <a-form-item label="Phòng ban">
-                <a-select v-model:value="form.department_id"
-                    :options="departments.map(d => ({ label: d.name, value: d.id }))" placeholder="Chọn phòng ban" />
-            </a-form-item>
+                <!-- Cột phải -->
+                <a-col :span="12">
+                    <a-form-item label="Chức vụ">
+                        <a-select v-model:value="form.position_id"
+                            :options="positions.map(p => ({ label: p.name, value: p.id }))"
+                            placeholder="Chọn chức vụ" />
+                    </a-form-item>
 
-            <a-form-item label="Bộ phận">
-                <a-input v-model:value="form.division" placeholder="Nhập bộ phận" />
-            </a-form-item>
+                    <a-form-item label="Mô tả chức vụ">
+                        <a-input v-model:value="form.position_detail" placeholder="Nhập mô tả" />
+                    </a-form-item>
 
-            <a-form-item label="Quyền truy cập">
-                <a-radio-group v-model:value="form.isAdmin" >
-                    <a-radio :value="1" :disabled="!props.currentUserIdIsAdmin">Admin</a-radio>
-                    <a-radio :value="0">Người dùng thường</a-radio>
-                </a-radio-group>
-            </a-form-item>
+                    <a-form-item label="Phòng ban">
+                        <a-select v-model:value="form.department_id"
+                            :options="departments.map(d => ({ label: d.name, value: d.id }))"
+                            placeholder="Chọn phòng ban" />
+                    </a-form-item>
+
+                    <a-form-item label="Bộ phận">
+                        <a-input v-model:value="form.division" placeholder="Nhập bộ phận" />
+                    </a-form-item>
+
+                    <a-form-item label="Quyền truy cập">
+                        <a-radio-group v-model:value="form.isAdmin">
+                            <a-radio :value="1" :disabled="!props.currentUserIdIsAdmin">Admin</a-radio>
+                            <a-radio :value="0">Người dùng thường</a-radio>
+                        </a-radio-group>
+                    </a-form-item>
+                </a-col>
+            </a-row>
         </a-form>
+
     </a-modal>
 </template>
 

@@ -51,7 +51,7 @@ import { onMounted, computed } from 'vue'
 import { resolveStoragePath } from '@/utils/storage'
 
 const authStore = useAuthStore()
-
+console.log(authStore)
 const router = useRouter()
 
 const logout = async () => {

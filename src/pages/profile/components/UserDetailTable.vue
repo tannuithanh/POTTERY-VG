@@ -7,7 +7,7 @@
     <a-descriptions-item label="Địa chỉ">{{ user.address }}</a-descriptions-item>
     <a-descriptions-item label="Chức vụ">{{ user.position?.name || '—' }}</a-descriptions-item>
     <a-descriptions-item label="Mô tả công việc">{{ user.position_detail }}</a-descriptions-item>
-    <a-descriptions-item label="Bộ phận">{{ user.department?.name || '—' }}</a-descriptions-item>
+    <a-descriptions-item label="Phòng ban">{{ user.department?.name || '—' }}</a-descriptions-item>
     <a-descriptions-item label="Quyền hạn">{{ user.is_admin ? 'Quản trị viên' : 'Người dùng thường'
       }}</a-descriptions-item>
   </a-descriptions>

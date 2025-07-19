@@ -42,23 +42,6 @@ const form = ref({
     role_id: null,
     user_ids: []
 })
-const dropdownRender = (menu) => {
-    return h('div', {}, [
-        menu,
-        h('div', {
-            style: {
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '4px 8px',
-                borderTop: '1px solid #f0f0f0',
-                background: '#fff'
-            }
-        }, [
-            h('a', { onClick: selectAllUsers }, 'Chọn tất cả'),
-            h('a', { style: 'color: red', onClick: clearAllUsers }, 'Bỏ chọn')
-        ])
-    ])
-}
 const selectAllUsers = () => {
     form.value.user_ids = users.value.map(user => user.id)
 }
@@ -115,22 +98,32 @@ const userOptions = computed(() =>
 )
 
 const handleSubmit = async () => {
-    if (!form.value.role_id) {
-        return notification.warning({
-            message: 'Thiếu thông tin',
-            description: 'Vui lòng chọn vai trò.'
-        })
-    }
+  if (!form.value.role_id) {
+    return notification.warning({
+      message: 'Thiếu thông tin',
+      description: 'Vui lòng chọn vai trò.'
+    })
+  }
 
-    try {
-        loading.value = true
-        await emit('submit', form.value)
-        notification.success({ message: 'Phân quyền thành công!' })
-        emit('update:visible', false)
-    } catch (err) {
-        notification.error({ message: 'Lỗi', description: 'Không thể phân quyền!' })
-    } finally {
-        loading.value = false
-    }
+  if (!form.value.user_ids || form.value.user_ids.length === 0) {
+    return notification.warning({
+      message: 'Thiếu thông tin',
+      description: 'Vui lòng chọn ít nhất một người dùng.'
+    })
+  }
+
+  try {
+    loading.value = true
+    await emit('submit', form.value)
+    emit('update:visible', false)
+  } catch (err) {
+    notification.error({
+      message: 'Lỗi',
+      description: 'Không thể phân quyền!'
+    })
+  } finally {
+    loading.value = false
+  }
 }
+
 </script>

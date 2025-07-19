@@ -20,9 +20,9 @@ import News from "@/pages/setting/components/news_manager/index.vue";
 import CreateNews from "@/pages/news/CreateNews.vue";
 import LeaveForm from "@/pages/forms/leaveForm/LeaveForm.vue";
 import LoginPage from "@/pages/login/LoginPage.vue";
-import { useAuthStore } from "@/stores/auth";
-import { notification } from "ant-design-vue";
 
+import { handlePermissionGuard } from "./guards/permissionGuard";
+import { handleAuthGuard } from "./guards/authGuard";
 const routes = [
   {
     path: "/",
@@ -42,10 +42,6 @@ const routes = [
       },
       {
         path: "/settings",
-        redirect: "/settings/user_manager",
-      },
-      {
-        path: "/settings",
         component: SettingLayouts,
         meta: { title: "Cài đặt hệ thống" },
         children: [
@@ -53,31 +49,34 @@ const routes = [
             path: "decentralization_manager",
             name: "Decentralization",
             component: DecentralizationManager,
-            meta: { title: "Quản lý phân quyền" },
+            meta: { title: "Quản lý phân quyền", requiresAdmin: true },
           },
           {
             path: "role_permission_manager",
             name: "rolePermissionManager",
             component: RolePermissionManager,
-            meta: { title: "Quản lý phân quyền và vai trò" },
+            meta: { title: "Quản lý phân quyền và vai trò", requiresAdmin: true },
           },
           {
             path: "user_manager",
             name: "userManager",
             component: UserManager,
-            meta: { title: "Quản lý người dùng" },
+            meta: { title: "Quản lý người dùng",  moduleCode: "user_manager_module", },
           },
           {
             path: "department_manager",
             name: "departmentManager",
             component: DepartmentManager,
-            meta: { title: "Quản lý phòng ban" },
+            meta: {
+              title: "Quản lý phòng ban",
+              moduleCode: "user_manager_module",
+            },
           },
           {
             path: "module_manager",
             name: "moduleManager",
             component: ModuleManager,
-            meta: { title: "Quản lý chức năng" },
+            meta: { title: "Quản lý chức năng", requiresAdmin: true  },
           },
           {
             path: "news_manager",
@@ -127,25 +126,13 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
-// 🛡️ Check login trước khi vào mỗi route
+
 router.beforeEach((to, from, next) => {
-  const publicPages = ['/login']
-  const authRequired = !publicPages.includes(to.path)
+  const passed = handleAuthGuard(to, from, next);
+  if (!passed) return;
 
-  const auth = useAuthStore()
-  const isLoggedIn = !!auth.token // ✅ KHÔNG cần storeToRefs
-
-  if (authRequired && !isLoggedIn) {
-    notification.warning({
-      message: 'Bạn chưa đăng nhập',
-      description: 'Vui lòng đăng nhập để tiếp tục.'
-    })
-
-    return next({ path: '/login', query: { redirect: to.fullPath } })
-  }
-
-  next()
-})
+  handlePermissionGuard(to, from, next);
+});
 
 router.afterEach((to) => {
   if (to.meta?.title) {

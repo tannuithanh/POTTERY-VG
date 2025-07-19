@@ -5,13 +5,13 @@
             <a-button class="addButton" type="primary" @click="openModal">+ Phân quyền</a-button>
         </div>
 
-        <a-table :columns="columns" :dataSource="groupedPermissions" rowKey="key" bordered>
-
-            <template #action="{ record }">
-                <TableActionButtons :showEdit="true" :showDelete="true" :showView="true" @delete="handleDelete(record)"
-                    @view="handleView(record)" @edit="handleEdit(record)" />
+        <a-table :columns="columns" :dataSource="groupedPermissions" rowKey="key" bordered :loading="loadingTable">
+            <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'action'">
+                    <TableActionButtons :showEdit="true" :showDelete="true" :showView="true"
+                        @delete="handleDelete(record)" @view="handleView(record)" @edit="handleEdit(record)" />
+                </template>
             </template>
-
         </a-table>
     </a-card>
 
@@ -85,41 +85,41 @@ const editingRoleId = ref(null)
 const editingModuleId = ref(null)
 
 const handleEdit = async (record) => {
-  const roleId = record.roleId
-  const moduleId = record.modulesRaw[0]?.moduleId
-  if (!roleId || !moduleId) return
+    const roleId = record.roleId
+    const moduleId = record.modulesRaw[0]?.moduleId
+    if (!roleId || !moduleId) return
 
-  isEdit.value = true
-  editingRoleId.value = roleId
-  editingModuleId.value = moduleId
+    isEdit.value = true
+    editingRoleId.value = roleId
+    editingModuleId.value = moduleId
 
-  // Gọi API để lấy tất cả permission của module đó
-  try {
-    const res = await permissionService.getByModule(moduleId)
-    permissions.value = res.data
+    // Gọi API để lấy tất cả permission của module đó
+    try {
+        const res = await permissionService.getByModule(moduleId)
+        permissions.value = res.data
 
-    // Sau khi permissions được gán, mới set form (vue sẽ đánh dấu checkbox đúng)
-    const selectedPermissions = rolePermissions.value
-      .filter(
-        (item) =>
-          item.role?.id === roleId &&
-          item.permission?.module?.id === moduleId
-      )
-      .map((item) => item.permission_id)
+        // Sau khi permissions được gán, mới set form (vue sẽ đánh dấu checkbox đúng)
+        const selectedPermissions = rolePermissions.value
+            .filter(
+                (item) =>
+                    item.role?.id === roleId &&
+                    item.permission?.module?.id === moduleId
+            )
+            .map((item) => item.permission_id)
 
-    form.value = {
-      roleId,
-      moduleId,
-      permissionIds: selectedPermissions
+        form.value = {
+            roleId,
+            moduleId,
+            permissionIds: selectedPermissions
+        }
+
+        showModal.value = true
+    } catch (err) {
+        notification.error({
+            message: 'Lỗi',
+            description: 'Không thể lấy danh sách quyền.'
+        })
     }
-
-    showModal.value = true
-  } catch (err) {
-    notification.error({
-      message: 'Lỗi',
-      description: 'Không thể lấy danh sách quyền.'
-    })
-  }
 }
 
 
@@ -129,37 +129,37 @@ const modules = ref([])
 const permissions = ref([])         // Danh sách permission liên quan module
 const rolePermissions = ref([])
 const columns = [
-    {
-        title: 'Vai trò',
-        dataIndex: 'roleName',
-        key: 'roleName'
-    },
-    {
-        title: 'Module',
-        dataIndex: 'modules',
-        key: 'modules'
-    },
-    {
-        title: 'Hành động',
-        key: 'action',
-        slots: { customRender: 'action' }
-    }
+  {
+    title: 'Vai trò',
+    dataIndex: 'roleName',
+    key: 'roleName'
+  },
+  {
+    title: 'Module',
+    dataIndex: 'modules',
+    key: 'modules'
+  },
+  {
+    title: 'Hành động',
+    key: 'action'
+  }
 ]
 
+
 watch(() => form.value.moduleId, async (moduleId) => {
-  if (!moduleId) return
+    if (!moduleId) return
 
-  try {
-    const res = await permissionService.getByModule(moduleId)
-    permissions.value = res.data
+    try {
+        const res = await permissionService.getByModule(moduleId)
+        permissions.value = res.data
 
-    // ✅ Chỉ reset nếu KHÔNG phải đang edit
-    if (!isEdit.value) {
-      form.value.permissionIds = []
+        // ✅ Chỉ reset nếu KHÔNG phải đang edit
+        if (!isEdit.value) {
+            form.value.permissionIds = []
+        }
+    } catch (err) {
+        notification.error('Lỗi khi tải danh sách quyền theo module')
     }
-  } catch (err) {
-    notification.error('Lỗi khi tải danh sách quyền theo module')
-  }
 })
 
 const fetchRolePermissions = async () => {

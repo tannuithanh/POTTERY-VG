@@ -21,20 +21,31 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
+let isLoggingOut = false
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response && error.response.status === 401) {
-      const { useAuthStore } = await import('@/stores/auth')
-      const auth = useAuthStore()
+      if (!isLoggingOut) {
+        isLoggingOut = true
 
-      // Gọi logout để xóa token trong store và redirect
-      await auth.logout(false)
+        const { useAuthStore } = await import('@/stores/auth')
+        const auth = useAuthStore()
 
-      notification.error({
-        message: 'Phiên đăng nhập đã hết hạn',
-        description: 'Vui lòng đăng nhập lại để tiếp tục.'
-      })
+        // Đảm bảo không gọi API logout nếu không cần
+        await auth.logout(false)
+
+        notification.error({
+          message: 'Phiên đăng nhập đã hết hạn',
+          description: 'Vui lòng đăng nhập lại để tiếp tục.'
+        })
+
+        // Tránh spam sau 3s hoặc khi route đã redirect
+        setTimeout(() => {
+          isLoggingOut = false
+        }, 3000)
+      }
     }
 
     return Promise.reject(error)

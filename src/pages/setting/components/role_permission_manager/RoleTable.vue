@@ -5,11 +5,18 @@
       <a-button class="addButton" type="primary" @click="$emit('create')">+ Thêm vai trò</a-button>
     </div>
     <a-table :columns="columns" :dataSource="roles" rowKey="id" bordered @rowClick="onSelect">
-      <template #action="{ record }">
-        <TableActionButtons :showEdit="true" :showDelete="true" :showView="false" @edit="$emit('edit', record)"
-          @delete="$emit('delete', record)" />
+      <template #bodyCell="{ column, record, index }">
+        <template v-if="column.key === 'index'">
+          {{ index + 1 }}
+        </template>
+
+        <template v-if="column.key === 'action'">
+          <TableActionButtons :showEdit="true" :showDelete="true" :showView="false" @edit="$emit('edit', record)"
+            @delete="$emit('delete', record)" />
+        </template>
       </template>
     </a-table>
+
   </a-card>
 </template>
 
@@ -24,13 +31,15 @@ const columns = [
   {
     title: 'STT',
     key: 'index',
-    customRender: ({ index }) => index + 1,
+    dataIndex: 'index',
+    align: 'center',
     width: 70
   },
-  { title: 'Tên vai trò', dataIndex: 'name' },
-  { title: 'Mã code', dataIndex: 'code' },
-  { title: 'Hành động', key: 'action', slots: { customRender: 'action' } }
+  { title: 'Tên vai trò', dataIndex: 'name', key: 'name' },
+  { title: 'Mã code', dataIndex: 'code', key: 'code' },
+  { title: 'Hành động', key: 'action' }
 ]
+
 
 const onSelect = (_, record) => emit('select', record)
 </script>
