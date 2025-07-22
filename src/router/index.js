@@ -16,10 +16,13 @@ import RolePermissionManager from "@/pages/setting/components/role_permission_ma
 //Quản lý phân quyền
 import DecentralizationManager from "@/pages/setting/components/decentralization/index.vue";
 //Quản lý bảng tin
-import News from "@/pages/setting/components/news_manager/index.vue";
+// import News from "@/pages/setting/components/news_manager/index.vue";
 import CreateNews from "@/pages/news/CreateNews.vue";
 import LeaveForm from "@/pages/forms/leaveForm/LeaveForm.vue";
 import LoginPage from "@/pages/login/LoginPage.vue";
+
+//Quản lý chức năng
+import ModuleSetting from "@/pages/module_manager/index.vue";
 
 import { handlePermissionGuard } from "./guards/permissionGuard";
 import { handleAuthGuard } from "./guards/authGuard";
@@ -40,10 +43,10 @@ const routes = [
         component: FormLayouts,
         meta: { title: "Mẫu đăng ký" },
       },
-      {
+      {	
         path: "/settings",
         component: SettingLayouts,
-        meta: { title: "Cài đặt hệ thống" },
+        meta: { title: "Cài đặt hệ thống" , moduleCode: "user_manager_module"},
         children: [
           {
             path: "decentralization_manager",
@@ -61,7 +64,7 @@ const routes = [
             path: "user_manager",
             name: "userManager",
             component: UserManager,
-            meta: { title: "Quản lý người dùng",  moduleCode: "user_manager_module", },
+            meta: { title: "Quản lý người dùng",  moduleCode: "user_manager_module"},
           },
           {
             path: "department_manager",
@@ -69,7 +72,7 @@ const routes = [
             component: DepartmentManager,
             meta: {
               title: "Quản lý phòng ban",
-              moduleCode: "user_manager_module",
+              requiresAdmin: true
             },
           },
           {
@@ -78,13 +81,13 @@ const routes = [
             component: ModuleManager,
             meta: { title: "Quản lý chức năng", requiresAdmin: true  },
           },
-          {
-            path: "news_manager",
-            name: "newsManager",
-            component: News,
-            meta: { title: "Quản lý bảng tin" },
-          },
         ],
+      },
+      {
+        path: '/module-management',
+        name: 'ModuleManagement',
+        component: ModuleSetting,
+        meta: { title: 'Quản lý chức năng', requiresAdmin: true  }
       },
       {
         path: "/profile",
@@ -108,7 +111,7 @@ const routes = [
             path: "leave_form",
             name: "leave_Form",
             component: LeaveForm,
-            meta: { title: "Biểu mẫu giấy ra vào cổng" },
+            meta: { title: "Biểu mẫu giấy ra vào cổng", moduleCode: "form_module" },
           },
         ],
       },

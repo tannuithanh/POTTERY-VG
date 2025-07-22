@@ -1,10 +1,11 @@
 <template>
-    <a-layout-header class="header" >
+    <a-layout-header class="header">
         <div class="header-mobile">
             <img src="@/assets/images/logo.png" alt="Logo" class="header__logo" />
             <menu-outlined class="mobile-menu-icon" @click="drawerVisible = true" />
 
-            <a-drawer  theme="light"  placement="left" width="280" :visible="drawerVisible" @close="drawerVisible = false">
+            <a-drawer theme="light" placement="left" width="280" :visible="drawerVisible"
+                @close="drawerVisible = false">
                 <div class="mobile-drawer">
                     <a-menu mode="inline" theme="light" :openKeys="openKeys" @openChange="onOpenChange"
                         @click="drawerVisible = false">
@@ -36,7 +37,7 @@
                         <div class="user-name">{{ authStore.user?.name }}</div>
                         <div class="user-email">{{ authStore.user?.position_detail }}</div>
                         <div class="user-actions">
-                            <a-button type="text" block>
+                            <a-button type="text" block @click="changePassVisible = true">
                                 <SettingOutlined /> Change Password
                             </a-button>
                             <a-button type="primary" danger block @click="logout">
@@ -47,7 +48,9 @@
                 </div>
             </a-drawer>
         </div>
+        <ChangePasswordModal v-model:open="changePassVisible" />
     </a-layout-header>
+
 </template>
 
 <script setup>
@@ -64,7 +67,9 @@ import { useRouter } from 'vue-router'
 import { notification } from 'ant-design-vue'
 import { onMounted, computed } from 'vue'
 import { resolveStoragePath } from '@/utils/storage'
+import ChangePasswordModal from '@/components/common/ChangePasswordModal.vue'
 
+const changePassVisible = ref(false)
 const drawerVisible = ref(false)
 const openKeys = ref([])
 
@@ -77,7 +82,7 @@ function onOpenChange(keys) {
 const authStore = useAuthStore()
 const router = useRouter()
 const avatar = computed(() =>
-  authStore.user?.avatar ? resolveStoragePath(authStore.user.avatar) : ''
+    authStore.user?.avatar ? resolveStoragePath(authStore.user.avatar) : ''
 )
 
 const logout = async () => {
@@ -95,8 +100,8 @@ const logout = async () => {
         })
     }
 }
-onMounted(async() => {
-  await authStore.fetchMe()
+onMounted(async () => {
+    await authStore.fetchMe()
 })
 </script>
 
@@ -107,12 +112,13 @@ onMounted(async() => {
 }
 
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 64px;
-  padding: 0 16px;
-  background-color: #ffffff; /* ✅ thêm dòng này */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+    padding: 0 16px;
+    background-color: #ffffff;
+    /* ✅ thêm dòng này */
 }
 
 
@@ -128,9 +134,10 @@ onMounted(async() => {
 }
 
 .mobile-menu-icon {
-  font-size: 22px;
-  cursor: pointer;
-  color: #333; /* ✅ đổi từ trắng thành xám đậm */
+    font-size: 22px;
+    cursor: pointer;
+    color: #333;
+    /* ✅ đổi từ trắng thành xám đậm */
 }
 
 
@@ -159,30 +166,4 @@ onMounted(async() => {
     color: #666;
     margin-bottom: 16px;
 }
-
-/* ✅ Style cho menu trong mobile drawer */
-::v-deep(.ant-menu-light .ant-menu-item-selected),
-::v-deep(.ant-menu-light .ant-menu-submenu-selected) {
-  background-color: rgba(192, 98, 82, 0.1) !important;
-  color: #c06252 !important;
-}
-
-::v-deep(.ant-menu-light .ant-menu-item:hover),
-::v-deep(.ant-menu-light .ant-menu-submenu-title:hover) {
-  background-color: rgba(192, 98, 82, 0.05) !important;
-  color: #c06252 !important;
-}
-
-/* ✅ Icon bên trong menu */
-::v-deep(.ant-menu-item .anticon),
-::v-deep(.ant-menu-submenu-title .anticon) {
-  color: #333; /* mặc định */
-}
-
-::v-deep(.ant-menu-light .ant-menu-item-selected .anticon),
-::v-deep(.ant-menu-light .ant-menu-item:hover .anticon),
-::v-deep(.ant-menu-light .ant-menu-submenu-title:hover .anticon) {
-  color: #c06252 !important;
-}
-
 </style>

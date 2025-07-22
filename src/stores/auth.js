@@ -1,27 +1,44 @@
 import { defineStore } from "pinia";
-import api from "@/plugins/axios";
+import api from "@/plugins/axios-user";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: localStorage.getItem("access_token") || null,
     user: null,
-    modules: []
+    modules: [],
   }),
+  persist: {
+    paths: ["token", "user", "modules"], // 🆕 lưu 3 trường này
+  },
 
   actions: {
     // 🟢 Đăng nhập
     async login({ email, password }) {
-      const res = await api.post("/login", { email, password });
-      this.token = res.data.access_token;
+      try {
+        const res = await api.post(
+          "/login",
+          { email, password },
+          { skipAuthInterceptor: true }
+        );
+        this.token = res.data.access_token;
 
-      // 🔐 Lưu token
-      localStorage.setItem("access_token", this.token);
-      api.defaults.headers.common.Authorization = `Bearer ${this.token}`;
+        // 🔐 Lưu token
+        localStorage.setItem("access_token", this.token);
+        api.defaults.headers.common.Authorization = `Bearer ${this.token}`;
 
-      // 👤 Lấy user
-      const me = await api.get("/me");
-      this.user = me.data;
-      this.modules = me.data.modules || [];
+        // 👤 Lấy user
+        const me = await api.get("/me");
+        this.user = me.data;
+        this.modules = me.data.modules || [];
+
+        return { success: true };
+      } catch (err) {
+        // Không throw nữa, trả về lỗi cụ thể
+        return {
+          success: false,
+          message: err?.response?.data?.message || "Đăng nhập thất bại",
+        };
+      }
     },
 
     // 🔐 Tải lại thông tin user (nếu đã có token)
@@ -35,6 +52,11 @@ export const useAuthStore = defineStore("auth", {
       } catch (err) {
         this.logout(); // Token hết hạn hoặc lỗi -> auto logout
       }
+    },
+
+    // Đúng cú pháp method trong object
+    async changePassword(payload) {
+      return api.post("/change-password", payload);
     },
 
     // 🔴 Đăng xuất

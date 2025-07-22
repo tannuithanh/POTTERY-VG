@@ -32,7 +32,7 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import { useRouter,useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { notification } from 'ant-design-vue'
 
@@ -59,13 +59,13 @@ const handleLogin = async () => {
     return notification.error({
       message: 'Lỗi đăng nhập',
       description: 'Vui lòng nhập email'
-    })
+    });
   }
   if (!form.email.includes('@')) {
     return notification.error({
       message: 'Lỗi đăng nhập',
       description: 'Email không hợp lệ'
-    })
+    });
   }
 
   // Kiểm tra mật khẩu
@@ -73,30 +73,31 @@ const handleLogin = async () => {
     return notification.error({
       message: 'Lỗi đăng nhập',
       description: 'Vui lòng nhập mật khẩu'
-    })
+    });
   }
 
   try {
-    loading.value = true
-    await authStore.login(form)
+    loading.value = true;
+    const result = await authStore.login(form);
+
+    if (!result.success) {
+      return notification.error({
+        message: 'Đăng nhập thất bại',
+        description: result.message
+      });
+    }
+
     notification.success({
       message: 'Thành công',
       description: 'Đăng nhập thành công'
-    })
+    });
 
-
-    const redirectPath = route.query.redirect || '/'
-    router.push(redirectPath)
-
-  } catch (error) {
-    notification.error({
-      message: 'Đăng nhập thất bại',
-      description: error?.response?.data?.message || 'Vui lòng kiểm tra lại'
-    })
+    const redirectPath = route.query.redirect || '/';
+    router.push(redirectPath);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 
 </script>

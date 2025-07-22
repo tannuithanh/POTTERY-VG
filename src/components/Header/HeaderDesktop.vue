@@ -1,7 +1,15 @@
 <template>
     <a-layout-header class="header">
-        <div class="header-desktop">
+        <div class="header-desktop" style="display: flex; align-items: center; gap: 8px;">
+            <!-- Nút Trợ lý AI riêng biệt -->
+            <a-tooltip title="Trợ lý AI">
+                <a-button shape="circle" type="text" @click="aiVisible = true"
+                    style="width: 40px; height: 40px; font-size: 20px;">
+                    <RobotOutlined />
+                </a-button>
+            </a-tooltip>
             <a-dropdown placement="bottomRight" trigger="click">
+
                 <a class="header__user" @click.prevent>
                     <a-avatar :size="32" :src="avatar" />
                     <div class="user-meta">
@@ -9,15 +17,29 @@
                         <div class="header__position">{{ authStore.user?.position_detail }}</div>
                     </div>
                 </a>
+                <a-tooltip class="header__user" title="Trợ lý AI">
+                    <a-button shape="circle" type="text" @click="aiVisible = true"
+                        style="width: 40px; height: 40px; font-size: 20px; margin-right: 8px;">
+                        <RobotOutlined />
+                    </a-button>
+                </a-tooltip>
+
 
                 <template #overlay>
                     <a-menu class="custom-dropdown-menu">
-                        <a-menu-item :to="'/settings'">
+                        <a-menu-item key="1">
                             <template #icon>
                                 <SettingOutlined />
                             </template>
                             <router-link to="/settings"> Cài đặt hệ thống</router-link>
                         </a-menu-item>
+                        <a-menu-item key="5">
+                            <template #icon>
+                                <AppstoreOutlined />
+                            </template>
+                            <router-link to="/module-management">Quản lý chức năng</router-link>
+                        </a-menu-item>
+
 
                         <a-menu-item key="2">
                             <template #icon>
@@ -25,6 +47,13 @@
                             </template>
                             <router-link to="/profile"> Thông tin người dùng</router-link>
                         </a-menu-item>
+                        <a-menu-item key="4" @click="changePassVisible = true">
+                            <template #icon>
+                                <KeyOutlined />
+                            </template>
+                            Đổi mật khẩu
+                        </a-menu-item>
+
                         <a-menu-item key="3" danger @click="logout">
                             <template #icon>
                                 <LogoutOutlined />
@@ -35,23 +64,33 @@
                 </template>
             </a-dropdown>
         </div>
+        <ChangePasswordModal v-model:open="changePassVisible" />
+        <AIChatDrawer v-model:open="aiVisible" />
     </a-layout-header>
+
+
+
 </template>
 
 <script setup>
 import {
     SettingOutlined,
     InfoCircleOutlined,
-    LogoutOutlined
+    LogoutOutlined,
+    KeyOutlined,
+    RobotOutlined,
+    AppstoreOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { notification } from 'ant-design-vue'
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { resolveStoragePath } from '@/utils/storage'
-
+import ChangePasswordModal from '@/components/common/ChangePasswordModal.vue'
+import AIChatDrawer from '../common/AIChatDrawer.vue'
+const aiVisible = ref(false)
 const authStore = useAuthStore()
-console.log(authStore)
+const changePassVisible = ref(false)
 const router = useRouter()
 
 const logout = async () => {
@@ -70,11 +109,11 @@ const logout = async () => {
     }
 }
 const avatar = computed(() =>
-  authStore.user?.avatar ? resolveStoragePath(authStore.user.avatar) : ''
+    authStore.user?.avatar ? resolveStoragePath(authStore.user.avatar) : ''
 )
 
-onMounted(async() => {
-  await authStore.fetchMe()
+onMounted(async () => {
+    await authStore.fetchMe()
 })
 </script>
 

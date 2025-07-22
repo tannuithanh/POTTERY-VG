@@ -1,4 +1,4 @@
-import api from '@/plugins/axios'
+import api from '@/plugins/axios-user'
 
 const actionService = {
   // Lấy danh sách tất cả hành động (action)

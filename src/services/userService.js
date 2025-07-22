@@ -1,4 +1,4 @@
-import api from "@/plugins/axios";
+import api from "@/plugins/axios-user";
 
 const userService = {
   getAll() {
@@ -27,6 +27,9 @@ const userService = {
     });
   },
 
+  getManagers() {
+    return api.get('/managers')
+  }
 };
 
 export default userService;

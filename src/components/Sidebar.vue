@@ -63,25 +63,5 @@ const activeKey = computed(() => {
   object-fit: contain;
 }
 
-/* Màu nền khi được chọn */
-::v-deep(.ant-menu-light .ant-menu-item-selected) {
-  background-color: rgba(192, 98, 82, 0.1) !important;
-  color: #c06252 !important;
-}
 
-/* Màu icon khi được chọn */
-::v-deep(.ant-menu-light .ant-menu-item-selected .anticon) {
-  color: #c06252 !important;
-}
-
-/* Màu khi hover */
-::v-deep(.ant-menu-light .ant-menu-item:hover) {
-  background-color: rgba(192, 98, 82, 0.05) !important;
-  color: #c06252 !important;
-}
-
-/* Màu icon khi hover */
-::v-deep(.ant-menu-light .ant-menu-item:hover .anticon) {
-  color: #c06252 !important;
-}
 </style>

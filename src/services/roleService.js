@@ -1,4 +1,4 @@
-import api from '@/plugins/axios'
+import api from '@/plugins/axios-user'
 
 const roleService = {
   // Lấy tất cả vai trò (có thể có tìm kiếm)

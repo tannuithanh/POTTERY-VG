@@ -2,7 +2,7 @@
     <a-card>
         <div class="card-header">
             <div class="section-title">Danh sách chức năng</div>
-            <a-button class="addButton" type="primary" @click="$emit('create')">+ Thêm chức năng</a-button>
+            <a-button type="primary" @click="$emit('create')">+ Thêm chức năng</a-button>
         </div>
         <a-table :columns="columns" :dataSource="data" rowKey="id" bordered>
             <template #action="{ record }">

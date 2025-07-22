@@ -1,4 +1,4 @@
-import api from "@/plugins/axios";
+import api from "@/plugins/axios-user";
 
 const permissionService = {
   // Lấy tất cả danh sách permission

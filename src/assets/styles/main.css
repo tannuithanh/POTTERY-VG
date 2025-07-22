@@ -13,18 +13,19 @@ body {
 
 /* Cứ bảng nào có nút thêm thì add class vô */
 .addButton {  
-  background-color: #c06252;
-  border-color: #c06252;
-  color: #fff;
+  border-radius: 6px;
+  font-weight: 500;
+  background-color: #c06252 !important;
+  border-color: #c06252 !important;
+  color: #fff !important;
   transition: all 0.3s ease;
 }
 
 
 .addButton:hover,
 .addButton:focus {
-  background-color: #a84f42; 
-  border-color: #a84f42 !important;
-  color: #fff !important;
+  background-color: #b35044 !important;
+  border-color: #b35044 !important;
 }
 
 /* Dùng cho tittle của component để nó responsive */
@@ -123,27 +124,3 @@ body {
     caret-color: #c06252;
 }
 
-
-
-/* Tùy chỉnh màu chính và border cho phân trang */
-
-
-.ant-pagination-item-active {
-  border-color: #c06252 !important;
-  color: black !important
-}
-
-.ant-pagination-item:hover,
-.ant-pagination-prev:hover,
-.ant-pagination-next:hover {
-  border-color: #c06252 !important;
-  color: #c06252 !important;
-}
-
-.ant-pagination .ant-pagination-item-active a {
-  color: #c06252;
-}
-
-.ant-pagination .ant-pagination-item-active:hover a{
-  color: #c06252;
-}

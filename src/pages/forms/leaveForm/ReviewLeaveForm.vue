@@ -1,107 +1,131 @@
 <template>
-    <a-modal :open="visible" width="900px" @cancel="close" :footer="null">
-        <div class="print-area">
-            <table class="form-header">
-                <tbody>
-                    <tr>
-                        <td class="logo-cell" style="text-align: center;">
-                            <img src="@/assets/images/logo.png" alt="Logo" class="logo" />
-                        </td>
-                        <td class="title-cell">
-                            <h1>GIẤY RA VÀO CỔNG</h1>
-                        </td>
-                        <td class="meta-cell" style="font-size: 13px;">
-                            <div><strong>MÃ SỐ:</strong> BM03/HCNS</div>
-                            <div><strong>LẦN BH:</strong> 02</div>
-                            <div><strong>NGÀY BH:</strong> 15/09/2023</div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+  <a-modal :visible="props.visible" :footer="null" width="900px" wrap-class-name="modal-preview-fixed" >
+    <div class="print-area">
+      <table class="form-header">
+        <tbody>
+          <tr>
+            <td class="logo-cell" style="text-align: center;">
+              <img src="@/assets/images/logo.png" alt="Logo" class="logo" />
+            </td>
+            <td class="title-cell">
+              <h1 style="margin-top:auto;margin-bottom:auto">GIẤY RA VÀO CỔNG</h1>
+            </td>
+            <td class="meta-cell" style="font-size: 13px;">
+              <div><strong>MÃ SỐ:</strong> BM03/HCNS</div>
+              <div><strong>LẦN BH:</strong> 02</div>
+              <div><strong>NGÀY BH:</strong> 15/09/2023</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-            <div class="form-body">
-                <div class="row right">
-                    <span>{{ currentDate }}</span>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label>Tôi tên là</label><span>: {{ data.fullName }}</span>
-                    </div>
-                    <div class="col">
-                        <label>MSNV</label><span>: {{ data.msnv }}</span>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label>Bộ phận</label><span>: {{ data.department }}</span>
-                    </div>
-                    <div class="col">
-                        <label>Chức vụ</label><span>: {{ data.position }}</span>
-                    </div>
-                </div>
-
-                <div>
-                    <p>Được ra vào cổng công ty TNHH Vinh Gia:</p>
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <label>- Từ ngày</label><span>: {{ fromDateFormatted }}</span>
-                    </div>
-                    <div class="col">
-                        <label>Đến ngày</label><span>: {{ toDateFormatted }}</span>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col"> 
-                        <label>- Lý do</label><span>: {{ data.reason }}</span>
-                    </div>
-                </div>
-
-                <table class="signatures-table">
-                    <tbody>
-                        <tr>
-                            <td class="center">
-                                <strong>QUẢN LÝ TRỰC TIẾP</strong>
-                                <div class="signature">{{ data.manager }}</div>
-                            </td>
-                            <td class="center">
-                                <strong>NGƯỜI ĐỀ NGHỊ</strong>
-                                <div class="signature">{{ data.fullName }}</div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="actions">
-                    <a-button type="primary" @click="$emit('back')">Hoàn thành</a-button>
-                    <a-button danger>Hủy bỏ</a-button>
-                </div>
-            </div>
+      <div class="form-body">
+        <div class="row right">
+          <span>{{ currentDate }}</span>
         </div>
-    </a-modal>
+
+        <div class="row">
+          <div class="col">
+            <label>Tôi tên là</label><span>: {{ data.fullName }}</span>
+          </div>
+          <div class="col">
+            <label>MSNV</label><span>: {{ data.msnv }}</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label>Bộ phận</label><span>: {{ data.department }}</span>
+          </div>
+          <div class="col">
+            <label>Chức vụ</label><span>: {{ data.position }}</span>
+          </div>
+        </div>
+
+        <div>
+          <p>Được ra vào cổng công ty TNHH Vinh Gia:</p>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label>- Từ ngày</label><span>: {{ fromDateFormatted }}</span>
+          </div>
+          <div class="col">
+            <label>Đến ngày</label><span>: {{ toDateFormatted }}</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label>- Lý do</label><span>: {{ data.reason }}</span>
+          </div>
+        </div>
+
+        <table class="signatures-table">
+          <tbody>
+            <tr>
+              <td class="center">
+                <strong>QUẢN LÝ TRỰC TIẾP</strong>
+                <div class="signature">{{ managerName  }}</div>
+              </td>
+              <td class="center">
+                <strong>NGƯỜI ĐỀ NGHỊ</strong>
+                <div class="signature">{{ data.fullName }}</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="actions">
+          <a-button type="primary" @click="handleSubmit">Hoàn thành</a-button>
+          <a-button danger @click="close">Huỷ bỏ</a-button>
+        </div>
+      </div>
+    </div>
+  </a-modal>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { formatDateTime } from '@/utils/formatDate'
+
 const props = defineProps({
-    visible: Boolean,
-    data: Object,
+  visible: Boolean,
+  data: Object,
+  managers: Array,
 })
-const emit = defineEmits(['update:visible'])
+
+const emit = defineEmits(['update:visible', 'submit'])
 
 const close = () => emit('update:visible', false)
+
+const handleSubmit = () => emit('submit', props.data)
 
 const fromDateFormatted = computed(() => formatDateTime(props.data?.fromDate))
 const toDateFormatted = computed(() => formatDateTime(props.data?.toDate))
 
+const currentDate = computed(() => {
+  const now = new Date()
+  const day = now.getDate().toString().padStart(2, '0')
+  const month = (now.getMonth() + 1).toString().padStart(2, '0')
+  const year = now.getFullYear()
+  return `Ngày ${day} tháng ${month} năm ${year}`
+})
+
+const managerName = computed(() => {
+  const found = props.managers.find((m) => m.id === props.data.managerId)
+  return found ? found.name : '[Không xác định]'
+})
 </script>
 
 <style scoped>
+.print-area {
+  font-family: Tahoma;
+  background: white;
+  padding: 24px;
+  min-width: 800px; /* 👈 fix chiều rộng tối thiểu như desktop */
+  overflow-x: auto; /* 👈 cho phép scroll ngang nếu không đủ */
+}
 .signatures-table {
     width: 100%;
     border-collapse: collapse;
@@ -200,7 +224,7 @@ span {
 }
 
 .signature {
-    margin-top: 60px;
+    margin-top: 80px;
     font-weight: normal;
 }
 
