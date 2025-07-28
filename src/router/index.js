@@ -26,6 +26,7 @@ import ModuleSetting from "@/pages/module_manager/index.vue";
 
 import { handlePermissionGuard } from "./guards/permissionGuard";
 import { handleAuthGuard } from "./guards/authGuard";
+import CheckFormCreat from "@/pages/forms/CheckFormCreat.vue";
 const routes = [
   {
     path: "/",
@@ -38,10 +39,10 @@ const routes = [
         meta: { title: "Trang chủ" },
       },
       {
-        path: "/forms",
-        name: "formsLayout",
-        component: FormLayouts,
-        meta: { title: "Mẫu đăng ký" },
+        path: "/check_form_create",
+        name: "checkFormCreate",
+        component: CheckFormCreat,
+        meta: { title: "Danh sách hồ sơ điện tử", moduleCode: "form"},
       },
       {	
         path: "/settings",
@@ -111,7 +112,7 @@ const routes = [
             path: "leave_form",
             name: "leave_Form",
             component: LeaveForm,
-            meta: { title: "Biểu mẫu giấy ra vào cổng", moduleCode: "form_module" },
+            meta: { title: "Biểu mẫu giấy ra vào cổng", moduleCode: "form" },
           },
         ],
       },

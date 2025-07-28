@@ -1,5 +1,5 @@
 <template>
-    <a-modal :open="visible" @update:open="val => emit('update:visible', val)" title="Phân quyền người dùng"
+    <a-modal :visible="visible" @update:visible="val => emit('update:visible', val)" title="Phân quyền người dùng"
         okText="Lưu" cancelText="Huỷ" @ok="handleSubmit" :confirmLoading="loading">
         <a-form layout="vertical">
             <!-- Select vai trò -->
@@ -19,7 +19,7 @@
                 </a-space>
 
                 <a-select v-model:value="form.user_ids" mode="multiple" :options="userOptions"
-                    placeholder="Chọn người dùng để gán vai trò" allowClear />
+                    placeholder="Chọn người dùng để gán vai trò" optionFilterProp="label" showSearch allowClear />
             </a-form-item>
         </a-form>
     </a-modal>
@@ -98,32 +98,32 @@ const userOptions = computed(() =>
 )
 
 const handleSubmit = async () => {
-  if (!form.value.role_id) {
-    return notification.warning({
-      message: 'Thiếu thông tin',
-      description: 'Vui lòng chọn vai trò.'
-    })
-  }
+    if (!form.value.role_id) {
+        return notification.warning({
+            message: 'Thiếu thông tin',
+            description: 'Vui lòng chọn vai trò.'
+        })
+    }
 
-  if (!form.value.user_ids || form.value.user_ids.length === 0) {
-    return notification.warning({
-      message: 'Thiếu thông tin',
-      description: 'Vui lòng chọn ít nhất một người dùng.'
-    })
-  }
+    if (!form.value.user_ids || form.value.user_ids.length === 0) {
+        return notification.warning({
+            message: 'Thiếu thông tin',
+            description: 'Vui lòng chọn ít nhất một người dùng.'
+        })
+    }
 
-  try {
-    loading.value = true
-    await emit('submit', form.value)
-    emit('update:visible', false)
-  } catch (err) {
-    notification.error({
-      message: 'Lỗi',
-      description: 'Không thể phân quyền!'
-    })
-  } finally {
-    loading.value = false
-  }
+    try {
+        loading.value = true
+        await emit('submit', form.value)
+        emit('update:visible', false)
+    } catch (err) {
+        notification.error({
+            message: 'Lỗi',
+            description: 'Không thể phân quyền!'
+        })
+    } finally {
+        loading.value = false
+    }
 }
 
 </script>

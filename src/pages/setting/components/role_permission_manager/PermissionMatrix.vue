@@ -16,7 +16,7 @@
     </a-card>
 
     <!-- Modal phân quyền -->
-    <a-modal v-model:open="showModal" title="Phân quyền cho vai trò" okText="Lưu" cancelText="Huỷ" @ok="handleSave">
+    <a-modal v-model:visible="showModal" title="Phân quyền cho vai trò" okText="Lưu" cancelText="Huỷ" @ok="handleSave">
         <a-form layout="vertical">
             <a-form-item label="Chọn vai trò">
                 <a-select v-model:value="form.roleId" :disabled="isEdit" placeholder="Chọn vai trò">

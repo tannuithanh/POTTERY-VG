@@ -1,5 +1,5 @@
 <template>
-    <a-modal :open="modelValue" :title="isEdit ? 'Cập nhật nhân sự' : 'Thêm nhân sự'" @ok="handleSubmit"
+    <a-modal :visible="modelValue" :title="isEdit ? 'Cập nhật nhân sự' : 'Thêm nhân sự'" @ok="handleSubmit"
         @cancel="emit('update:modelValue', false)" ok-text="Lưu" cancel-text="Hủy" :confirm-loading="loading">
         <a-form layout="vertical" :model="form">
             <a-row :gutter="16">

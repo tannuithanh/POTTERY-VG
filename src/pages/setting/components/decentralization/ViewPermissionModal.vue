@@ -1,5 +1,5 @@
 <template>
-  <a-modal :open="visible" @update:open="val => $emit('update:visible', val)"
+  <a-modal :visible="visible" @visible:open="val => $emit('update:visible', val)"
     :title="`Chi tiết quyền của vai trò: ${roleName}`" footer={null}>
     <a-list bordered :data-source="items">
       <template #renderItem="{ item }">

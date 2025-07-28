@@ -3,11 +3,12 @@
         <div class="header-desktop" style="display: flex; align-items: center; gap: 8px;">
             <!-- Nút Trợ lý AI riêng biệt -->
             <a-tooltip title="Trợ lý AI">
-                <a-button shape="circle" type="text" @click="aiVisible = true"
+                <a-button shape="circle" type="text" @click="handleClickAI"
                     style="width: 40px; height: 40px; font-size: 20px;">
                     <RobotOutlined />
                 </a-button>
             </a-tooltip>
+
             <a-dropdown placement="bottomRight" trigger="click">
 
                 <a class="header__user" @click.prevent>
@@ -17,12 +18,6 @@
                         <div class="header__position">{{ authStore.user?.position_detail }}</div>
                     </div>
                 </a>
-                <a-tooltip class="header__user" title="Trợ lý AI">
-                    <a-button shape="circle" type="text" @click="aiVisible = true"
-                        style="width: 40px; height: 40px; font-size: 20px; margin-right: 8px;">
-                        <RobotOutlined />
-                    </a-button>
-                </a-tooltip>
 
 
                 <template #overlay>
@@ -33,12 +28,13 @@
                             </template>
                             <router-link to="/settings"> Cài đặt hệ thống</router-link>
                         </a-menu-item>
-                        <a-menu-item key="5">
+                        <a-menu-item v-if="authStore.user?.is_admin != 0" key="5">
                             <template #icon>
                                 <AppstoreOutlined />
                             </template>
                             <router-link to="/module-management">Quản lý chức năng</router-link>
                         </a-menu-item>
+
 
 
                         <a-menu-item key="2">
@@ -64,8 +60,10 @@
                 </template>
             </a-dropdown>
         </div>
-        <ChangePasswordModal v-model:open="changePassVisible" />
-        <AIChatDrawer v-model:open="aiVisible" />
+        <ChangePasswordModal :visible="changePassVisible" @update:visible="changePassVisible = $event" />
+
+        <AIChatDrawer :visible="aiVisible" @update:visible="aiVisible = $event" />
+
     </a-layout-header>
 
 
@@ -89,7 +87,11 @@ import { resolveStoragePath } from '@/utils/storage'
 import ChangePasswordModal from '@/components/common/ChangePasswordModal.vue'
 import AIChatDrawer from '../common/AIChatDrawer.vue'
 const aiVisible = ref(false)
+const handleClickAI = () => {
+    aiVisible.value = true
+}
 const authStore = useAuthStore()
+
 const changePassVisible = ref(false)
 const router = useRouter()
 

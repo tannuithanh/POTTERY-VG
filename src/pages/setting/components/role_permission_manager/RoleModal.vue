@@ -1,5 +1,5 @@
 <template>
-    <a-modal :title="record?.id ? 'Chỉnh sửa vai trò' : 'Thêm vai trò mới'" :open="visible" @ok="onSubmit"
+    <a-modal :title="record?.id ? 'Chỉnh sửa vai trò' : 'Thêm vai trò mới'"  :visible="visible" @ok="onSubmit"
         @cancel="() => $emit('update:visible', false)" okText="Lưu" cancelText="Hủy">
         <a-form layout="vertical">
             <a-form-item label="Tên vai trò" required>

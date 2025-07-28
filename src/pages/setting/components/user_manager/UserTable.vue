@@ -6,7 +6,8 @@
         </div>
 
         <a-table :columns="columns" :dataSource="users" rowKey="id" :scroll="{ x: 'max-content' }"
-            :pagination="{ pageSize: 10, showSizeChanger: true, showQuickJumper: true }" />
+            :pagination="pagination" @change="handleTableChange" />
+
 
         <UserFormModal v-model:modelValue="showModal" :form="formData" :isEdit="isEdit"
             :currentUserIsAdmin="props.currentUserIdIsAdmin" @success="emit('refresh')" />
@@ -100,9 +101,24 @@ const handleDelete = (record) => {
         }
     })
 }
+const pagination = ref({
+    current: 1,
+    pageSize: 10,
+    showSizeChanger: true,
+    showQuickJumper: true
+})
+
+const handleTableChange = (pag) => {
+    pagination.value = { ...pagination.value, ...pag }
+}
 
 const columns = [
-    { title: 'STT', dataIndex: 'index', customRender: ({ index }) => index + 1 },
+    {
+        title: 'STT',
+        key: 'stt',
+        customRender: ({ index }) =>
+            (pagination.value.current - 1) * pagination.value.pageSize + index + 1
+    },
     { title: 'Họ và tên', dataIndex: 'name' },
     { title: 'Mã số nhân viên', dataIndex: 'msnv' },
     { title: 'Số điện thoại', dataIndex: 'phone' },

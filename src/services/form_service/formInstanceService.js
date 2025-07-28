@@ -6,5 +6,9 @@ export const formInstanceService = {
   },
   getAll() {
     return formApi.get('/form-instances')
+  },
+
+  deleteFormInstance(id) {
+    return formApi.delete(`/form-instances/${id}`)
   }
 }

@@ -2,7 +2,7 @@
     <div>
         <a-card>
             <div class="card-header">
-                <div class="section-title">Danh sách chức năng</div>
+                <div class="section-title">Danh sách biểu mẫu</div>
                 <a-button class="addButton" type="primary" @click="openCreateModal">+ Thêm biểu mẫu</a-button>
 
             </div>
@@ -22,8 +22,8 @@
                 </template>
             </a-table>
 
-
-            <a-modal v-model:open="showModal" :title="editingForm ? 'Sửa biểu mẫu' : 'Tạo biểu mẫu'" @ok="handleSubmit">
+            <a-modal v-model:visible="showModal" :title="editingForm ? 'Sửa biểu mẫu' : 'Tạo biểu mẫu'"
+                @ok="handleSubmit">
                 <a-form :model="form" layout="vertical">
                     <a-form-item label="Mã biểu mẫu">
                         <a-input v-model:value="form.code" />

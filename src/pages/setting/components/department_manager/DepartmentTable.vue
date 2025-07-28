@@ -24,7 +24,7 @@
         </a-table>
 
         <!-- Modal thêm mới -->
-        <a-modal v-model:open="showModal" title="Thêm bộ phận" ok-text="Lưu" cancel-text="Hủy" @ok="handleAdd">
+        <a-modal v-model:visible="showModal" title="Thêm bộ phận" ok-text="Lưu" cancel-text="Hủy" @ok="handleAdd">
             <a-form layout="vertical" :model="formData">
                 <a-form-item label="Tên bộ phận" required>
                     <a-input v-model:value="formData.name" placeholder="Nhập tên bộ phận" />

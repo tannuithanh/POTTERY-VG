@@ -11,12 +11,13 @@
           <span>Trang chủ</span>
         </router-link>
       </a-menu-item>
-      <a-sub-menu key="profile" :icon="h(IdcardOutlined)" title="Hồ sơ điện tử">
+      <a-sub-menu v-if="user.user?.is_admin || user.modules.some(m => m.code === 'form')" key="profile"
+        :icon="h(IdcardOutlined)" title="Hồ sơ điện tử">
         <a-menu-item key="forms_create">
           <router-link to="/forms_create">Tạo hồ sơ điện tử</router-link>
         </a-menu-item>
         <a-menu-item key="profile-list">
-          <router-link to="/forms/list">Danh sách hồ sơ</router-link>
+          <router-link to="/check_form_create">Danh sách hồ sơ</router-link>
         </a-menu-item>
       </a-sub-menu>
 
@@ -38,9 +39,11 @@
 import { HomeOutlined, IdcardOutlined, ProfileOutlined } from '@ant-design/icons-vue'
 import { useRoute } from 'vue-router'
 import { computed, ref, h } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 const collapsed = ref(false)
 const route = useRoute()
 
+const user = useAuthStore();
 const activeKey = computed(() => {
   if (route.path === '/') return 'home'
   if (route.path === '/forms') return 'forms'
@@ -62,6 +65,4 @@ const activeKey = computed(() => {
   max-width: 100%;
   object-fit: contain;
 }
-
-
 </style>
