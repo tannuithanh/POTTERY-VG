@@ -25,8 +25,11 @@
         <a-menu-item key="create_news">
           <router-link to="/create_news">Tạo bảng tin</router-link>
         </a-menu-item>
-        <a-menu-item key="news-list">
-          <router-link to="/news/list">Thông tin bảng tin</router-link>
+        <a-menu-item key="news_list">
+          <router-link to="/news_list">Thông tin bảng tin</router-link>
+        </a-menu-item>
+        <a-menu-item key="News-list_manager">
+          <router-link to="/news_list_manager">Danh sách hồ sơ</router-link>
         </a-menu-item>
       </a-sub-menu>
 
@@ -45,10 +48,19 @@ const route = useRoute()
 
 const user = useAuthStore();
 const activeKey = computed(() => {
-  if (route.path === '/') return 'home'
-  if (route.path === '/forms') return 'forms'
-  return ''
-})
+  const path = route.path;
+
+  if (path === '/') return 'home';
+  if (path.startsWith('/forms_create')) return 'forms_create';
+  if (path.startsWith('/check_form_create')) return 'profile-list';
+
+  if (path.startsWith('/create_news')) return 'create_news';
+  if (path.startsWith('/news_list_manager')) return 'News-list_manager';
+  if (path.startsWith('/news_list')) return 'news_list';
+
+  return '';
+});
+
 </script>
 
 <style scoped>

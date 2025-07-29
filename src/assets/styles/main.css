@@ -90,7 +90,6 @@ body {
 }
 
 
-
 /* Đổi màu viền khi hover */
 .ant-input:hover,
 .ant-textarea:hover,
@@ -124,3 +123,8 @@ body {
     caret-color: #c06252;
 }
 
+
+/* Tiny */
+.tox .tox-statusbar {
+  display: none !important;
+}

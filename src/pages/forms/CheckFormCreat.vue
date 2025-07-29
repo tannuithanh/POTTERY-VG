@@ -4,14 +4,14 @@
   </div>
   <div>
     <a-card bordered>
-      <FormInstanceSearch @search="onSearch"  @export="exportToExcel" />
+      <FormInstanceSearch @search="onSearch" @export="exportToExcel" />
 
       <a-table :columns="columns" :data-source="filteredInstances" :loading="loading" row-key="id"
-        :pagination="{ pageSize: 10 }" :scroll="{ x: 'max-content' }"  />
+        :pagination="{ pageSize: 10 }" :scroll="{ x: 'max-content' }" />
     </a-card>
   </div>
   <FormInstanceDetail v-if="selectedRecord" :visible="isPreviewVisible" :form-instance="selectedRecord"
-    @close="onDetailClosed" @updated="onFormUpdated"/>
+    @close="onDetailClosed" @updated="onFormUpdated" />
 
 </template>
 
@@ -100,9 +100,9 @@ const fetchInstances = async () => {
     const res = await formInstanceService.getAll()
     allInstances.value = res.data.data || []
     filteredInstances.value = allInstances.value
-    console.log(filteredInstances.value)
+    message.log(filteredInstances.value)
   } catch (err) {
-    console.error('Lỗi khi tải danh sách phiếu:', err)
+    message.error('Lỗi khi tải danh sách phiếu:', err)
   } finally {
     loading.value = false
   }
@@ -187,8 +187,6 @@ async function handleDelete(record) {
     }
   }
 }
-
-
 
 
 function onDetailClosed() {

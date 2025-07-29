@@ -5,21 +5,19 @@
                 <a-form-item label="Tiêu đề bảng tin" name="title" required>
                     <a-input v-model:value="form.title" placeholder="Nhập tiêu đề..." />
                 </a-form-item>
-
                 <a-form-item label="Ngày xuất bản" name="publishDate" required>
-                    <a-date-picker v-model:value="form.publishDate" style="width: 100%" show-time disabled />
+                    <a-date-picker :disabled-date="disabledBeforeToday" v-model:value="form.publishDate"
+                        style="width: 100%" :disabled="true" />
                 </a-form-item>
             </a-col>
-
             <a-col :span="12">
                 <a-form-item label="Danh mục" name="category" required>
                     <a-select v-model:value="form.category" placeholder="Chọn danh mục">
-                        <a-select-option value="announcement">THÔNG BÁO - TIN TỨC</a-select-option>
-                        <a-select-option value="event">SỰ KIỆN</a-select-option>
-                        <a-select-option value="internal">NỘI BỘ</a-select-option>
+                        <a-select-option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                            {{ cat.name }}
+                        </a-select-option>
                     </a-select>
                 </a-form-item>
-
                 <a-form-item label="Người tạo" name="author">
                     <a-input v-model:value="form.author" disabled />
                 </a-form-item>
@@ -27,49 +25,118 @@
         </a-row>
 
         <a-form-item label="Nội dung" name="content" required>
-            <main id="sample">
-                <editor id="uuid" apiKey="9jugh9qhxyyoboxxz61jtvqzkphb5t4s9xu8qa6njnehuspu" :init="{
-                    plugins: 'advlist anchor autolink charmap code fullscreen help image insertdatetime link lists media preview searchreplace table visualblocks wordcount',
-                    toolbar: 'undo redo | styles | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-                    height: 500,
-                }" />
-            </main>
+            <Editor api-key="49ldyxe0mgiev7bgj2mw2vdgu2rrmwfvcht7e9kugd2hf66e" v-model="form.content" :init="{
+                height: 400,
+                menubar: false,
+                plugins: [
+                    'anchor', 'autolink', 'charmap', 'codesample', 'emoticons',
+                    'image', 'link', 'lists', 'media', 'table', 'visualblocks', 'wordcount'
+                ],
+                toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | image link | table'
+            }" />
         </a-form-item>
 
-        <a-form-item label="File đính kèm (có thể chọn nhiều)">
-            <a-upload v-model:file-list="form.attachments" :multiple="true" :before-upload="() => false"
-                list-type="text">
-                <a-button>Choose Files</a-button>
+        <a-form-item label="File đính kèm">
+            <a-upload v-model:file-list="form.attachments" list-type="picture-card" :before-upload="() => false"
+                :multiple="true">
+                <div>
+                    <plus-outlined />
+                    <div style="margin-top: 8px">upload file</div>
+                </div>
             </a-upload>
         </a-form-item>
 
+
         <a-form-item>
             <div style="display: flex; justify-content: center;">
-                <a-button type="primary" html-type="submit">Tạo bảng tin</a-button>
+                <a-button type="primary" html-type="submit" :loading="isSubmitting">
+                    Tạo bảng tin
+                </a-button>
+
             </div>
         </a-form-item>
-
     </a-form>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import Editor from '@tinymce/tinymce-vue';
+import { ref, onMounted } from 'vue'
+import Editor from '@tinymce/tinymce-vue'
+import { newsCategoryService } from '@/services/news_service/newsCategoryService'
+import { newsService } from '@/services/news_service/newsService'
 import dayjs from 'dayjs'
+import { useAuthStore } from '@/stores/auth'
+import { notification } from 'ant-design-vue'
+
+const isSubmitting = ref(false)
+
+const authStore = useAuthStore()
+
 const form = ref({
     title: '',
-    category: '',
     publishDate: dayjs(),
-    author: 'Administrator',
+    category: null,
+    author: authStore.user.name,
     content: '',
     attachments: [],
-});
+})
 
-const handleSubmit = () => {
-    console.log('Submitted:', form.value);
-    // Gọi API tại đây
-};
+const categories = ref([])
 
+const loadCategories = async () => {
+    try {
+        const res = await newsCategoryService.getMine()
+        categories.value = res.data.data // hoặc `res.data` nếu API trả mảng trực tiếp
+    } catch (error) {
+        console.error('Lỗi tải danh mục:', error)
+    }
+}
+const disabledBeforeToday = (current) => {
+    return current && current < dayjs().startOf('day')
+}
+onMounted(() => {
+    loadCategories()
+})
+
+const handleSubmit = async () => {
+    try {
+        const formData = new FormData()
+        formData.append('title', form.value.title)
+        formData.append('category_id', form.value.category)
+        formData.append('published_at', form.value.publishDate.format('YYYY-MM-DD'))
+        formData.append('content', form.value.content)
+
+        form.value.attachments.forEach((file) => {
+            formData.append('attachments[]', file.originFileObj)
+        })
+
+        const res = await newsService.create(formData)
+
+        // ✅ Hiển thị notification thay vì message
+        notification.success({
+            message: 'Thành công',
+            description: res.data.message || 'Tạo bảng tin thành công!',
+            duration: 3,
+        })
+        form.value = {
+            title: '',
+            publishDate: dayjs(),
+            category: null,
+            author: authStore.user.name,
+            content: '',
+            attachments: [],
+        }
+
+    } catch (error) {
+        console.error('❌ Lỗi tạo bảng tin:', error)
+
+        notification.error({
+            message: 'Lỗi',
+            description:
+                error.response?.data?.message || 'Tạo bảng tin thất bại!',
+            duration: 4,
+        })
+    }
+}
 
 
 </script>

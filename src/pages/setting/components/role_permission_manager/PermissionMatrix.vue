@@ -50,7 +50,7 @@
     </a-modal>
 
     <!-- xem quyền -->
-    <a-modal v-model:open="showViewModal" :title="`Chi tiết quyền của vai trò: ${viewRoleName}`" :footer="null"
+    <a-modal v-model:visible="showViewModal" :title="`Chi tiết quyền của vai trò: ${viewRoleName}`" :footer="null"
         width="600px">
         <a-descriptions bordered column="1">
             <a-descriptions-item v-for="item in viewPermissions" :key="item.moduleName" :label="item.moduleName">
