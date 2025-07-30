@@ -10,13 +10,13 @@
 
                 <div v-if="group.news.length">
                     <div v-for="item in group.news" :key="item.id"
-                        style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px">
+                        style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 5px">
                         <div><strong style="font-size: 16px;">{{ item.title }}</strong></div>
                         <div style="font-size: 14px; color: gray">{{ formatDate(item.published_at) }}</div>
                         <a @click="openDetail(item)">→ Xem chi tiết</a>
                     </div>
                 </div>
-                <div v-else style="color: white; margin-bottom: 8px;">Chưa có bảng tin nào.</div>
+                <a-empty style="color: white;" v-else :image="simpleImage" />
 
                 <!-- ✅ Nút Xem tất cả dưới cùng, căn phải -->
                 <div style="text-align: right; margin-top: 10px;">
@@ -39,7 +39,8 @@ import { ref, onMounted } from "vue";
 import { newsService } from "@/services/news_service/newsService";
 import NewsDetailModal from "./components/NewsDetailModal.vue";
 const groupedNews = ref([]);
-
+import { Empty } from 'ant-design-vue';
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 const loadGroupedNews = async () => {
     try {
         const res = await newsService.groupByCategory();

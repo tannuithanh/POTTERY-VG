@@ -13,7 +13,8 @@ import { Modal, message } from 'ant-design-vue'
 import { newsService } from '@/services/news_service/newsService'
 import TableActionButtons from '@/components/common/TableActionButtons.vue'
 import NewsDetailModal from './components/NewsDetailModal.vue'
-
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const newsList = ref([])
 const modalVisible = ref(false)
 const selectedNews = ref(null)
@@ -86,7 +87,7 @@ const handleView = (record) => {
 
 // 👉 Sửa (mở modal hoặc route sau này)
 const handleEdit = (record) => {
-    console.log('✏️ Sửa:', record)
+    router.push({ name: 'NewsEdit', params: { id: record.id } })
 }
 
 // 👉 Xoá

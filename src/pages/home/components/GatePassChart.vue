@@ -4,7 +4,7 @@
             <span class="title">📊 Biểu đồ giấy ra/vào cổng</span>
             <span class="month">Tháng 07/2025</span>
         </div>
-        <v-chart :option="option" autoresize style="height: 360px" />
+        <v-chart :option="option" autoresize style="height: 425px" />
     </div>
 </template>
 
@@ -15,49 +15,71 @@ import { BarChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
+import { formInstanceService } from '@/services/form_service/formInstanceService'
+import { DataZoomComponent } from 'echarts/components'
 
-use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, CanvasRenderer])
+use([BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, CanvasRenderer, DataZoomComponent])
 
 const option = ref({})
+const chartData = ref([])
 
-onMounted(() => {
-    option.value = {
-        tooltip: { trigger: 'axis' },
-        grid: { left: 60, bottom: 80 },
-        xAxis: {
-            type: 'category',
-            data: [
-                'BAN GIAM DOC', 'CNTT - TRỢ LÝ', 'BẢO VỆ', 'PHÒNG VẬT TƯ', 'PHÒNG KẾ TOÁN',
-                'BAN KIỂM SOÁT - TOÀN ÁN', 'PHÒNG QA', 'PHÒNG DVKH', 'PHÒNG ĐÁNH GIÁ',
-                'KẾ HOẠCH SẢN XUẤT', 'PHÁT TRIỂN SẢN PHẨM', 'KT THUẬT - CÔNG NGHỆ',
-                'ĐIỀU HÀNH SẢN XUẤT', 'XỊ MĂNG 1', 'XỊ MĂNG 2', 'KHO VẬT TƯ',
-                'KHO THÀNH PHẨM', 'ĐÓNG GÓI', 'QUẢN LÝ CHẤT LƯỢNG', 'KẾ HOẠCH KINH DOANH',
-                'SƠN MÀU', 'PHA SƠN', 'HÀNH CHÍNH - NHÂN SỰ', 'ĐIỀU HÀNH SẢN XUẤT HHH',
-                'KHO THÀNH PHẨM HHH', 'KHO VẬT TƯ HHH', 'SƠN MÀU HHH', 'ĐỨC - HOÀN TẤT HHH'
+// Gọi API khi mounted
+onMounted(async () => {
+    try {
+        const res = await formInstanceService.getGatePassStats()
+        chartData.value = res.data.data || []
+
+        // Chuyển data sang định dạng ECharts
+        const labels = chartData.value.map(item => item.department)
+        const counts = chartData.value.map(item => item.count)
+
+        option.value = {
+            tooltip: { trigger: 'axis' },
+            grid: { left: 20, bottom: 20, containLabel: true },
+            dataZoom: [
+                {
+                    type: 'slider',
+                    show: true,
+                    xAxisIndex: 0,
+                    height: 20,
+                    bottom: 0
+                },
+                {
+                    type: 'inside',
+                    xAxisIndex: 0
+                }
             ],
-            axisLabel: {
-                interval: 0,
-                rotate: 45,
-                color: '#b2493e',
-                fontSize: 11
-            }
-        },
-        yAxis: {
-            name: 'Số lượng giấy',
-            nameTextStyle: { color: '#b2493e' },
-            axisLabel: { color: '#b2493e' }
-        },
-        series: [
-            {
-                name: 'Phiếu',
-                type: 'bar',
-                data: Array.from({ length: 28 }, () => Math.floor(Math.random() * 20)),
-                itemStyle: { color: '#b2493e' }
-            }
-        ]
+            xAxis: {
+                type: 'category',
+                data: labels,
+                axisLabel: {
+                    interval: 0,
+                    rotate: 45,
+                    color: '#c06252',
+                    fontSize: 10
+                }
+            },
+            yAxis: {
+                name: 'Số lượng giấy',
+                nameTextStyle: { color: '#c06252' },
+                axisLabel: { color: '#c06252' }
+            },
+            series: [
+                {
+                    name: 'Phiếu',
+                    type: 'bar',
+                    data: counts,
+                    itemStyle: { color: '#c06252' }
+                }
+            ]
+        }
+
+    } catch (error) {
+        console.error('Lỗi khi tải dữ liệu biểu đồ:', error)
     }
 })
 </script>
+
 
 <style scoped>
 .chart-card {
@@ -72,12 +94,12 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     font-weight: bold;
-    color: #b2493e;
+    color: #c06252;
     margin-bottom: 8px;
 }
 
 .month {
-    background: #b2493e;
+    background: #c06252;
     color: white;
     padding: 2px 8px;
     border-radius: 8px;

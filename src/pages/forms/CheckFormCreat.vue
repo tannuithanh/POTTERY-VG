@@ -98,11 +98,11 @@ const fetchInstances = async () => {
   loading.value = true
   try {
     const res = await formInstanceService.getAll()
-    allInstances.value = res.data.data || []
+    allInstances.value = res.data|| []
     filteredInstances.value = allInstances.value
-    message.log(filteredInstances.value)
+    console.log('✅ fetched:', filteredInstances.value)
   } catch (err) {
-    message.error('Lỗi khi tải danh sách phiếu:', err)
+    message.error(`Lỗi khi tải danh sách phiếu: ${err?.response?.data?.message || err.message || 'Không rõ lỗi'}`)
   } finally {
     loading.value = false
   }

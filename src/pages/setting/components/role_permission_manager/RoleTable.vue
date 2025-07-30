@@ -4,7 +4,7 @@
       <div class="section-title">Danh sách vai trò</div>
       <a-button class="addButton" type="primary" @click="$emit('create')">+ Thêm vai trò</a-button>
     </div>
-    <a-table :columns="columns" :dataSource="roles" rowKey="id" bordered @rowClick="onSelect">
+    <a-table :columns="columns" :dataSource="roles" rowKey="id"  :scroll="{ x: 'max-content' }" bordered @rowClick="onSelect">
       <template #bodyCell="{ column, record, index }">
         <template v-if="column.key === 'index'">
           {{ index + 1 }}

@@ -36,6 +36,11 @@ export const newsService = {
 
   // 📚 Lấy tất cả hạng mục kèm theo 5 bảng tin mới nhất
   groupByCategory() {
-    return newsApi.get('/news/group-by-category')
-  }
+    return newsApi.get("/news/group-by-category");
+  },
+
+  // 🆕 Lấy 5 bài viết mới nhất (không phân quyền)
+  latest() {
+    return newsApi.get("/news/latest");
+  },
 };

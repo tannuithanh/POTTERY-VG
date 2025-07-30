@@ -4,7 +4,7 @@
             <div class="section-title">Danh sách chức năng</div>
             <a-button type="primary" @click="$emit('create')">+ Thêm chức năng</a-button>
         </div>
-        <a-table :columns="columns" :dataSource="data" rowKey="id" bordered>
+        <a-table :columns="columns" :dataSource="data" rowKey="id"  :scroll="{ x: 'max-content' }" bordered>
             <template #action="{ record }">
                 <TableActionButtons :showEdit="true" :showDelete="true" :showView="false" @edit="$emit('edit', record)"
                     @delete="handleDelete(record)" />

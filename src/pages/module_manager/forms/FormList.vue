@@ -7,7 +7,7 @@
 
             </div>
 
-            <a-table :dataSource="forms" :columns="columns" rowKey="id" bordered>
+            <a-table :dataSource="forms" :columns="columns" rowKey="id"  :scroll="{ x: 'max-content' }" bordered>
                 <template #bodyCell="{ column, record }">
                     <!-- Kích hoạt -->
                     <template v-if="column.key === 'is_active'">

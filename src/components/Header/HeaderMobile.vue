@@ -15,19 +15,30 @@
                                 <span>Trang chủ</span>
                             </router-link>
                         </a-menu-item>
-
-                        <a-sub-menu key="user">
-                            <template #title>
-                                <span>
-                                    <UserOutlined />
-                                    <span>Quản lý người dùng</span>
-                                </span>
-                            </template>
-                            <a-menu-item key="users">
-                                <router-link to="/users">Danh sách người dùng</router-link>
+                        <a-sub-menu
+                            v-if="authStore.user?.is_admin || authStore.user?.modules?.some(m => m.code === 'form')"
+                            key="profile" title="Hồ sơ điện tử">
+                            <a-menu-item key="forms_create">
+                                <router-link to="/forms_create">Tạo hồ sơ điện tử</router-link>
                             </a-menu-item>
-                            <a-menu-item key="roles">
-                                <router-link to="/roles">Vai trò & quyền hạn</router-link>
+                            <a-menu-item key="profile-list">
+                                <router-link to="/check_form_create">Danh sách hồ sơ</router-link>
+                            </a-menu-item>
+                        </a-sub-menu>
+
+                        <a-sub-menu key="news" title="Bảng tin">
+                            <a-menu-item
+                                v-if="authStore.user?.is_admin || authStore.user?.modules?.some(m => m.code === 'news')"
+                                key="create_news">
+                                <router-link to="/create_news">Tạo bảng tin</router-link>
+                            </a-menu-item>
+                            <a-menu-item key="news_list">
+                                <router-link to="/news_list">Thông tin bảng tin</router-link>
+                            </a-menu-item>
+                            <a-menu-item
+                                v-if="authStore.user?.is_admin || authStore.user?.modules?.some(m => m.code === 'news')"
+                                key="News-list_manager">
+                                <router-link to="/news_list_manager">Danh sách hồ sơ</router-link>
                             </a-menu-item>
                         </a-sub-menu>
                     </a-menu>
@@ -36,22 +47,52 @@
                         <a-avatar :size="80" :src="avatar" />
                         <div class="user-name">{{ authStore.user?.name }}</div>
                         <div class="user-email">{{ authStore.user?.position_detail }}</div>
-                        <div class="user-actions">
-                            <a-button type="text" block @click="changePassVisible = true">
-                                <SettingOutlined /> Change Password
-                            </a-button>
-                            <a-button type="primary" danger block @click="logout">
-                                <LogoutOutlined /> Log out
-                            </a-button>
-                        </div>
+
+                        <a-menu class="custom-dropdown-menu" mode="vertical">
+                            <a-menu-item key="settings">
+                                <template #icon>
+                                    <SettingOutlined />
+                                </template>
+                                <router-link to="/settings">Cài đặt hệ thống</router-link>
+                            </a-menu-item>
+
+                            <a-menu-item v-if="authStore.user?.is_admin != 0" key="module-management">
+                                <template #icon>
+                                    <AppstoreOutlined />
+                                </template>
+                                <router-link to="/module-management">Quản lý chức năng</router-link>
+                            </a-menu-item>
+
+                            <a-menu-item key="profile">
+                                <template #icon>
+                                    <InfoCircleOutlined />
+                                </template>
+                                <router-link to="/profile">Thông tin người dùng</router-link>
+                            </a-menu-item>
+
+                            <a-menu-item key="change-password" @click="changePassVisible = true">
+                                <template #icon>
+                                    <KeyOutlined />
+                                </template>
+                                Đổi mật khẩu
+                            </a-menu-item>
+
+                            <a-menu-item key="logout" danger @click="logout">
+                                <template #icon>
+                                    <LogoutOutlined />
+                                </template>
+                                Đăng xuất
+                            </a-menu-item>
+                        </a-menu>
                     </div>
+
                 </div>
             </a-drawer>
         </div>
-        <ChangePasswordModal v-model:open="changePassVisible" />
+        <ChangePasswordModal v-model:visible="changePassVisible" />
     </a-layout-header>
-
 </template>
+
 
 <script setup>
 import {
@@ -59,7 +100,9 @@ import {
     MenuOutlined,
     SettingOutlined,
     LogoutOutlined,
-    UserOutlined
+    KeyOutlined,
+    InfoCircleOutlined,
+    AppstoreOutlined
 } from '@ant-design/icons-vue'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'

@@ -10,5 +10,12 @@ export const formInstanceService = {
 
   deleteFormInstance(id) {
     return formApi.delete(`/form-instances/${id}`)
+  },
+
+    // 📊 Call API lấy số lượng phiếu theo phòng ban
+  getGatePassStats(month) {
+    return formApi.get('/gate-pass-statistics', {
+      params: month ? { month } : {}
+    })
   }
 }

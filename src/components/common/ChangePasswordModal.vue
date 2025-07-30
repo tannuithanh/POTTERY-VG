@@ -1,5 +1,5 @@
 <template>
-    <a-modal v-model:open="visible" title="Đổi mật khẩu" @ok="handleOk" @cancel="handleCancel"
+    <a-modal v-model:visible="visible" title="Đổi mật khẩu" @ok="handleOk" @cancel="handleCancel"
         :confirm-loading="loading" ok-text="Xác nhận" cancel-text="Hủy">
         <a-form :model="form" :rules="rules" ref="formRef" layout="vertical">
             <a-form-item label="Mật khẩu cũ" name="currentPassword">

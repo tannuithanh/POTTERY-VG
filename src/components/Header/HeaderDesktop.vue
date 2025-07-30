@@ -18,8 +18,6 @@
                         <div class="header__position">{{ authStore.user?.position_detail }}</div>
                     </div>
                 </a>
-
-
                 <template #overlay>
                     <a-menu class="custom-dropdown-menu">
                         <a-menu-item key="1">
@@ -34,9 +32,6 @@
                             </template>
                             <router-link to="/module-management">Quản lý chức năng</router-link>
                         </a-menu-item>
-
-
-
                         <a-menu-item key="2">
                             <template #icon>
                                 <InfoCircleOutlined />
@@ -61,13 +56,8 @@
             </a-dropdown>
         </div>
         <ChangePasswordModal :visible="changePassVisible" @update:visible="changePassVisible = $event" />
-
         <AIChatDrawer :visible="aiVisible" @update:visible="aiVisible = $event" />
-
     </a-layout-header>
-
-
-
 </template>
 
 <script setup>
