@@ -1,9 +1,10 @@
   <template>
     <a-layout-sider theme="light" v-model:collapsed="collapsed" :trigger="null" collapsible>
       <div class="logo">
-        <img src="@/assets/images/logo.png" alt="Logo" />
+        <router-link to="/">
+          <img src="@/assets/images/logo.png" alt="Logo" width="75" />
+        </router-link>
       </div>
-
       <a-menu :selectedKeys="[activeKey]" theme="light" mode="inline">
         <a-menu-item key="home">
           <router-link to="/">

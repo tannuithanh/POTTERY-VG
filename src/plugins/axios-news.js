@@ -3,7 +3,7 @@ import { newsApiUrl } from "@/utils/env";
 
 const newsApi = axios.create({
   baseURL: newsApiUrl,
-  timeout: 10000,
+  timeout: 50000,
 });
 
 newsApi.interceptors.request.use((config) => {

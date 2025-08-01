@@ -59,16 +59,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted,h } from 'vue'
 import Editor from '@tinymce/tinymce-vue'
 import { newsCategoryService } from '@/services/news_service/newsCategoryService'
 import { newsService } from '@/services/news_service/newsService'
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/stores/auth'
-import { notification } from 'ant-design-vue'
+import { Modal, notification, Progress } from 'ant-design-vue'
 
 const isSubmitting = ref(false)
-
+const openProgressModal = () => {
+    modalInstance.value = Modal.info({
+        title: 'Đang gửi thông báo bảng tin mới đến tất cả người dùng...',
+        content: () =>
+            h(Progress, {
+                percent: progressPercent.value,
+                status: 'active',
+            }),
+        okButtonProps: { disabled: true },
+        okText: 'Đang gửi...',
+    })
+}
 const authStore = useAuthStore()
 
 const form = ref({
@@ -96,9 +107,17 @@ const disabledBeforeToday = (current) => {
 onMounted(() => {
     loadCategories()
 })
+const progressPercent = ref(0)
+const modalInstance = ref(null)
 
 const handleSubmit = async () => {
     try {
+        openProgressModal()
+        isSubmitting.value = true
+
+        // Giả lập hiệu ứng tăng phần trăm (nếu không có backend trả về %)
+        progressPercent.value = 10
+
         const formData = new FormData()
         formData.append('title', form.value.title)
         formData.append('category_id', form.value.category)
@@ -109,14 +128,19 @@ const handleSubmit = async () => {
             formData.append('attachments[]', file.originFileObj)
         })
 
+        progressPercent.value = 30 // giả lập upload file
+
         const res = await newsService.create(formData)
 
-        // ✅ Hiển thị notification thay vì message
+        progressPercent.value = 80 // gần hoàn thành
+
         notification.success({
             message: 'Thành công',
             description: res.data.message || 'Tạo bảng tin thành công!',
             duration: 3,
         })
+
+        // Reset form
         form.value = {
             title: '',
             publishDate: dayjs(),
@@ -126,17 +150,24 @@ const handleSubmit = async () => {
             attachments: [],
         }
 
+        progressPercent.value = 100
     } catch (error) {
         console.error('❌ Lỗi tạo bảng tin:', error)
 
         notification.error({
             message: 'Lỗi',
-            description:
-                error.response?.data?.message || 'Tạo bảng tin thất bại!',
+            description: error.response?.data?.message || 'Tạo bảng tin thất bại!',
             duration: 4,
         })
+    } finally {
+        isSubmitting.value = false
+        setTimeout(() => {
+            if (modalInstance.value) modalInstance.value.destroy()
+            progressPercent.value = 0
+        }, 1000)
     }
 }
+
 
 
 </script>

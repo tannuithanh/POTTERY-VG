@@ -8,3 +8,6 @@ export const formApiUrl = import.meta.env.VITE_FORM_API_URL || '' // form_servic
 //NEWS SERVICE
 export const newsApiUrl = import.meta.env.VITE_NEWS_API_URL || '' 
 export const storageUrlNews = import.meta.env.VITE_NEWS_STORAGE_URL
+
+//NOTIFICATIONS SERVICE
+export const notificationUrl = import.meta.env.VITE_NOTIFICATION_API_URL || '' 

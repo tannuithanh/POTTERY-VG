@@ -4,11 +4,12 @@
             <!-- Nút Trợ lý AI riêng biệt -->
             <a-tooltip title="Trợ lý AI">
                 <a-button shape="circle" type="text" @click="handleClickAI"
-                    style="width: 40px; height: 40px; font-size: 20px;">
+                    style="width: 40px; height: 40px; font-size: 20px; margin-right: -10px;">
                     <RobotOutlined />
                 </a-button>
             </a-tooltip>
 
+            <NotificationBell />
             <a-dropdown placement="bottomRight" trigger="click">
 
                 <a class="header__user" @click.prevent>
@@ -67,7 +68,7 @@ import {
     LogoutOutlined,
     KeyOutlined,
     RobotOutlined,
-    AppstoreOutlined
+    AppstoreOutlined,
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
@@ -76,6 +77,7 @@ import { onMounted, computed, ref } from 'vue'
 import { resolveStoragePath } from '@/utils/storage'
 import ChangePasswordModal from '@/components/common/ChangePasswordModal.vue'
 import AIChatDrawer from '../common/AIChatDrawer.vue'
+import NotificationBell from '../common/NotificationBell.vue'
 const aiVisible = ref(false)
 const handleClickAI = () => {
     aiVisible.value = true

@@ -19,7 +19,7 @@
         </tbody>
       </table>
 
-      <div class="form-body">
+      <div class="form-body" style="margin-top: 10px !important;">
         <div style="text-align: right; width: 100%;">
           <span>
             Núi Thành, ngày {{ createdDay }} tháng {{ createdMonth }} năm {{ createdYear }}
@@ -88,20 +88,28 @@
 
                   </template>
 
-
-                  <!-- ✅ Nếu đã duyệt và có chữ ký -->
-                  <template v-else-if="step2Approved && step2HasSignature">
-                    <div class="signature-wrapper" style="position: relative; display: inline-block;">
-                      <!-- Ảnh chữ ký -->
-                      <img :src="step2SignatureUrl" alt="Chữ ký quản lý" class="signature-image" />
-
-                      <!-- Overlay thông tin -->
+                  <!-- ✅ Nếu đã duyệt và CÓ chữ ký -->
+                  <template v-if="step2Approved && step2HasSignature">
+                    <div class="signature-wrapper">
+                      <img :src="displaySignatureUrl" alt="Chữ ký quản lý" class="signature-image" />
                       <div class="signature-overlay">
                         <p v-if="step2ProcessedAt">{{ formatDateTime(step2ProcessedAt) }}</p>
                         <p v-if="step2Comment">{{ step2Comment }}</p>
                       </div>
                     </div>
                   </template>
+
+                  <!-- ✅ Nếu đã duyệt nhưng KHÔNG có chữ ký -->
+                  <template v-else-if="step2Approved && !step2HasSignature">
+                    <div class="signature-wrapper">
+                      <img :src="acceptImg" alt="Chữ ký mặc định" class="signature-image" />
+                      <div class="signature-overlay">
+                        <p v-if="step2ProcessedAt">{{ formatDateTime(step2ProcessedAt) }}</p>
+                        <p v-if="step2Comment">{{ step2Comment }}</p>
+                      </div>
+                    </div>
+                  </template>
+
 
 
 
@@ -126,7 +134,8 @@
                       alt="Chữ ký người đề nghị" class="signature-image" />
                   </template>
                   <template v-else>
-                    <div class="no-signature">Không có chữ ký</div>
+                    <div class="no-signature"> <img :src="acceptImg" alt="Chữ ký người đề nghị"
+                        class="signature-image" /></div>
                   </template>
                   <div class="signature-name">{{ firstApproverName }}</div>
                 </div>
@@ -148,6 +157,7 @@ import { formatDateTime } from '@/utils/formatDate'
 import { formApprovalService } from '@/services/form_service/formApprovalService'
 import { resolveStoragePath } from '@/utils/storage'
 import { notification } from 'ant-design-vue'
+import acceptImg from '@/assets/images/accept.png'
 /* ──────────────────────────────────────────────────────────────
   I. KHAI BÁO CƠ BẢN
 ─────────────────────────────────────────────────────────────── */
@@ -184,7 +194,6 @@ const toDateFormatted = formatDateTime(data.value.toDate)
 ─────────────────────────────────────────────────────────────── */
 
 const authStore = useAuthStore()
-console.log(authStore)
 const currentUserId = computed(() => authStore.user?.id)
 
 /* ──────────────────────────────────────────────────────────────
@@ -224,14 +233,6 @@ const firstApproverName = computed(() => {
   return step?.approver_info?.name || '—'
 })
 
-// Đường dẫn chữ ký người đề nghị nếu có
-const submitterSignaturePath = computed(() =>
-  props.formInstance?.steps?.[0]?.approver_info?.signature
-)
-
-const submitterSignatureUrl = computed(() =>
-  resolveStoragePath(submitterSignaturePath.value)
-)
 
 /* ──────────────────────────────────────────────────────────────
   V. XỬ LÝ DỮ LIỆU "QUẢN LÝ TRỰC TIẾP" (STEP 1)
@@ -256,14 +257,21 @@ const step2Rejected = computed(() =>
   step2.value?.status === 'rejected'
 )
 // Kiểm tra có chữ ký ở bước 2 không
-const step2HasSignature = computed(() =>
-  !!step2.value?.approver_info?.signature
-)
+const step2HasSignature = computed(() => {
+  const sig = step2.value?.approver_info?.signature
+  return !!sig && sig.trim() !== '' && sig !== 'null' && sig !== 'undefined'
+})
+
+
 
 // Đường dẫn chữ ký bước 2
-const step2SignatureUrl = computed(() =>
-  resolveStoragePath(step2.value?.approver_info?.signature)
-)
+const displaySignatureUrl = computed(() => {
+  const raw = step2.value?.approver_info?.signature
+  return raw ? resolveStoragePath(raw) : acceptImg
+})
+console.log('🔍 Raw signature:', step2.value?.approver_info?.signature)
+console.log('✅ Có chữ ký không:', step2HasSignature.value)
+console.log('🖼️ Ảnh hiển thị:', displaySignatureUrl.value)
 
 /* ──────────────────────────────────────────────────────────────
   VI. HÀNH ĐỘNG DUYỆT / TỪ CHỐI

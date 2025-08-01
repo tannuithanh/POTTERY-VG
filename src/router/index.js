@@ -10,6 +10,7 @@ import newsRoutes from "./modules/news.routes";
 import settingsRoutes from "./modules/settings.routes";
 import moduleRoutes from "./modules/module.routes";
 import authRoutes from "./modules/auth.routes";
+import notifacationRoutes from "./modules/notifacation.routes";
 
 const routes = [
   {
@@ -21,6 +22,7 @@ const routes = [
       ...newsRoutes,
       ...settingsRoutes,
       ...moduleRoutes,
+      ...notifacationRoutes
     ],
   },
   ...authRoutes,

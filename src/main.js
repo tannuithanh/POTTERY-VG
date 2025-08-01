@@ -5,7 +5,8 @@ import './assets/styles/main.css'
 import App from './App.vue'
 import router from './router'
 import Antd from 'ant-design-vue'
-import 'ant-design-vue/es/style'
+import 'ant-design-vue/dist/antd.less'
+import './plugins/echo'
 
 
 
