@@ -24,9 +24,4 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
-  server: {
-    host: "172.23.13.102", // <--- IP mong muốn
-    port: 5173, // hoặc port tuỳ ý
-    strictPort: true, // nếu muốn báo lỗi nếu port bị chiếm
-  },
 });
