@@ -1,7 +1,7 @@
 <template>
     <div>
         <h2 style="margin-bottom: 16px;">Danh sách bảng tin</h2>
-        <a-table :columns="columns" :dataSource="newsList" rowKey="id" bordered />
+        <a-table :columns="columns" :dataSource="newsList" rowKey="id" bordered :scroll="{ x: 'max-content' }" />
     </div>
 
     <NewsDetailModal v-model:visible="modalVisible" :news="selectedNews" />

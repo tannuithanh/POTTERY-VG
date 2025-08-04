@@ -43,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount  } from 'vue'
 import { BellOutlined } from '@ant-design/icons-vue'
 import notificationService from '@/services/notification_service/notificationService'
 import { formatDateTime } from '@/utils/formatDate'
@@ -53,6 +53,8 @@ import FormInstanceDetail from '@/pages/forms/leaveForm/FormInstanceDetail.vue'
 import { newsService } from '@/services/news_service/newsService'
 import NewsDetailModal from '@/pages/news/components/NewsDetailModal.vue'
 import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
 const mainColor = '#c06252'
 const notifications = ref([])
 
@@ -84,17 +86,39 @@ const getAvatar = (item) => {
     return item.avatar || 'https://cdn-icons-png.flaticon.com/512/747/747376.png' // Default icon
 }
 
-onMounted(() => {
-    fetchNotifications()
-    window.Echo.channel('notifications')
-        .listen('RealtimeNotificationSent', (e) => {    
-            notification.info({
-                message: `Thông báo!`,
-                description: 'Bạn có thông báo mới'
-            })
-            fetchNotifications()
-        })
 
+// 👇 Biến toàn cục để tránh bind nhiều lần
+let echoBound = false
+
+onMounted(() => {
+  fetchNotifications()
+
+  // 👇 Rút lui nếu đã bind (hủy cũ + bind lại mới)
+  window.Echo.leave('notifications')
+
+  window.Echo.channel('notifications')
+    .listen('.RealtimeNotificationSent', (e) => {
+      if (e.notification.user_id !== auth.user.id) return
+
+      console.log('📩 Nhận realtime notification:')
+      console.log('🆔 ID:', e.notification.id)
+      // ...
+
+      notification.info({
+        message: `🔔 ${e.notification.title}`,
+        description: e.notification.message,
+      })
+
+      fetchNotifications()
+    })
+})
+
+
+
+onBeforeUnmount(() => {
+  // 👇 Dọn channel khi component bị hủy
+  window.Echo.leave('notifications')
+  echoBound = false
 })
 
 const selectedNotification = ref(null)

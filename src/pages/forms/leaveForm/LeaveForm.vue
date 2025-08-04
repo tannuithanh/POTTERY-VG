@@ -73,7 +73,7 @@
         </a-form>
     </a-card>
 
-    <ReviewLeaveForm v-if="showPreview" :visible="showPreview" :managers="managerList" :data="formState" @update:visible="showPreview = $event"
+    <ReviewLeaveForm :visible="showPreview" :managers="managerList" :data="formState" @update:visible="showPreview = $event"
         @submit="createFormInstance" />
 </template>
 

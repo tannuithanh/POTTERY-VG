@@ -1,5 +1,5 @@
 <template>
-  <a-modal :visible="visible" :footer="null" width="900px" wrap-class-name="modal-preview-fixed" @cancel="close">
+  <a-modal :visible="visible" :footer="null" width="900px" wrap-class-name="modal-preview-fixed no-padding-modal":closable="false"@cancel="close">
     <div class="print-area">
       <table class="form-header">
         <tbody>
@@ -269,9 +269,6 @@ const displaySignatureUrl = computed(() => {
   const raw = step2.value?.approver_info?.signature
   return raw ? resolveStoragePath(raw) : acceptImg
 })
-console.log('🔍 Raw signature:', step2.value?.approver_info?.signature)
-console.log('✅ Có chữ ký không:', step2HasSignature.value)
-console.log('🖼️ Ảnh hiển thị:', displaySignatureUrl.value)
 
 /* ──────────────────────────────────────────────────────────────
   VI. HÀNH ĐỘNG DUYỆT / TỪ CHỐI
@@ -503,5 +500,10 @@ span {
   max-width: 262px;
   border-radius: 0px;
   color: red;
+}
+</style>
+<style>
+.no-padding-modal .ant-modal-body {
+  padding: 0 !important;
 }
 </style>

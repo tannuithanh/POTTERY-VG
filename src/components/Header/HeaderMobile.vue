@@ -2,7 +2,17 @@
     <a-layout-header class="header">
         <div class="header-mobile">
             <img src="@/assets/images/logo.png" alt="Logo" class="header__logo" />
-            <menu-outlined class="mobile-menu-icon" @click="drawerVisible = true" />
+            <div style="display: flex; align-items: center; gap: 4px;">
+                <!-- Chuông sát bên -->
+                <div style="margin: 10px;">
+                    <NotificationBell />
+                </div>
+                <!-- Menu icon -->
+                <menu-outlined class="mobile-menu-icon" @click="drawerVisible = true" style="font-size: 22px;" />
+
+
+            </div>
+
 
             <a-drawer theme="light" placement="left" width="280" :visible="drawerVisible"
                 @close="drawerVisible = false">
@@ -111,6 +121,7 @@ import { notification } from 'ant-design-vue'
 import { onMounted, computed } from 'vue'
 import { resolveStoragePath } from '@/utils/storage'
 import ChangePasswordModal from '@/components/common/ChangePasswordModal.vue'
+import NotificationBell from '../common/NotificationBell.vue'
 
 const changePassVisible = ref(false)
 const drawerVisible = ref(false)
