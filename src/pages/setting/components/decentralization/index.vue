@@ -25,7 +25,7 @@ const allUsers = ref([
 ])
 
 const assignUsersToRole = (data) => {
-  console.log('Dữ liệu phân quyền:', data)
+
   // Gọi API phân quyền ở đây
 }
 </script>

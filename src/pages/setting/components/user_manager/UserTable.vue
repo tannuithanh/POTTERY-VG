@@ -69,7 +69,7 @@ const openCreateModal = () => {
 }
 
 const handleEdit = (record) => {
-    console.log(formData.value, record)
+
     if (record.id === props.currentUserId) {
         return message.warning('Không thể sửa chính bạn!')
     }

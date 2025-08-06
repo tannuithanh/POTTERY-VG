@@ -119,5 +119,8 @@ export const useAuthStore = defineStore("auth", {
         return { success: false, error: msg };
       }
     },
+    async changePasswordFistTime(data) {
+      return api.post("/change-password-first-time", data);
+    },
   },
 });

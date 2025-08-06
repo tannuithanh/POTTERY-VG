@@ -99,11 +99,6 @@ onMounted(() => {
   window.Echo.channel('notifications')
     .listen('.RealtimeNotificationSent', (e) => {
       if (e.notification.user_id !== auth.user.id) return
-
-      console.log('📩 Nhận realtime notification:')
-      console.log('🆔 ID:', e.notification.id)
-      // ...
-
       notification.info({
         message: `🔔 ${e.notification.title}`,
         description: e.notification.message,
@@ -142,7 +137,6 @@ const handleClick = async (item) => {
 
         } else if (item.module === 'news') {
             const res = await newsService.getById(item.reference_id)
-            console.log(res.data)
             selectedNews.value = res.data.data
             showNewsModal.value = true
 

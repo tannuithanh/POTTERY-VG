@@ -3,7 +3,6 @@ import { notification } from "ant-design-vue";
 
 export function handlePermissionGuard(to, from, next) {
   const auth = useAuthStore();
-  console.log(auth)
   // 🛑 Nếu yêu cầu admin mà user không phải admin
   if (to.meta?.requiresAdmin && !auth.user?.is_admin) {
     notification.error({
@@ -31,3 +30,4 @@ export function handlePermissionGuard(to, from, next) {
 
   next();
 }
+

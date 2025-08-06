@@ -100,7 +100,6 @@ const fetchInstances = async () => {
     const res = await formInstanceService.getAll()
     allInstances.value = res.data|| []
     filteredInstances.value = allInstances.value
-    console.log('✅ fetched:', filteredInstances.value)
   } catch (err) {
     message.error(`Lỗi khi tải danh sách phiếu: ${err?.response?.data?.message || err.message || 'Không rõ lỗi'}`)
   } finally {

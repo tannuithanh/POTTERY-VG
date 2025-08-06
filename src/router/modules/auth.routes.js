@@ -1,4 +1,5 @@
-import ProfileLayouts from "@/pages/profile/ProfileLayouts.vue";
+
+import ForgotPassword from "@/pages/login/ForgotPassword.vue";
 import LoginPage from "@/pages/login/LoginPage.vue";
 
 export default [
@@ -8,5 +9,11 @@ export default [
     name: "login",
     component: LoginPage,
     meta: { title: "Đăng nhập" },
+  },
+    {
+    path: "/forgot-password",
+    name: "forgotPassword",
+    component: ForgotPassword,
+    meta: { title: "Quên mật khẩu" },
   },
 ];

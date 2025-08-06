@@ -57,7 +57,6 @@ const modalVisible = ref(false)
 const openDetail = (news) => {
     selectedNews.value = news
     modalVisible.value = true
-    console.log(selectedNews.value)
 }
 const formatDate = (date) => {
     if (!date) return ''

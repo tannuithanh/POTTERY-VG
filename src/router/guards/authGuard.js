@@ -2,7 +2,7 @@ import { useAuthStore } from "@/stores/auth";
 import { notification } from "ant-design-vue";
 
 export function handleAuthGuard(to, from, next) {
-  const publicPages = ["login", "LoginPage"];
+  const publicPages = ["login", "LoginPage","forgotPassword"];
   const authRequired = !publicPages.includes(to.name);
 
   const auth = useAuthStore();

@@ -10,11 +10,7 @@ function formatDateTime(input) {
   const yyyy = date.getFullYear();
   const hh = String(date.getHours()).padStart(2, "0");
   const ii = String(date.getMinutes()).padStart(2, "0");
-  const hasTime =
-    date.getHours() !== 0 ||
-    date.getMinutes() !== 0 ||
-    /T\d{2}:\d{2}/.test(input);
-  return hasTime ? `${dd}/${mm}/${yyyy} ${hh}:${ii}` : `${dd}/${mm}/${yyyy}`;
+  return `${dd}/${mm}/${yyyy} ${hh}:${ii}`;
 }
 
 function formatDuration(minutes) {
@@ -49,60 +45,63 @@ export function exportFormInstanceToExcel(data) {
     return;
   }
 
-  const userCountMap = {};
-
-  data.forEach((item) => {
-    const submitter = item.submitter_info?.name || "Không rõ";
-    const timeStart = item.data?.fromDate;
-    const startMinutes = parseTime(timeStart);
-
-    let late = 0;
-    let early = 0;
-
-    if (startMinutes > 450 && startMinutes <= 540) late++;
-    else if (startMinutes > 540 && startMinutes <= 690) early++;
-    else if (startMinutes > 780 && startMinutes <= 900) late++;
-    else if (startMinutes > 900 && startMinutes <= 990) early++;
-
-    if (!userCountMap[submitter]) {
-      userCountMap[submitter] = { late: 0, early: 0 };
-    }
-
-    userCountMap[submitter].late += late;
-    userCountMap[submitter].early += early;
-  });
-
   const exportData = data.map((item, index) => {
     const submitter = item.submitter_info?.name || "Không rõ";
+    const msnv = item.submitter_info?.msnv
     const timeStart = item.data?.fromDate;
     const timeEnd = item.data?.toDate;
+
     const startMinutes = parseTime(timeStart);
+    const endMinutes = parseTime(timeEnd);
 
     let lateText = "";
     let earlyText = "";
 
-    if (startMinutes > 450 && startMinutes <= 540)
-      lateText = `✅ ${formatDuration(startMinutes - 450)}`;
-    else if (startMinutes >= 541 && startMinutes <= 690)
-      earlyText = `✅ ${formatDuration(690 - startMinutes)}`;
-    else if (startMinutes > 780 && startMinutes <= 900)
-      lateText = `✅ ${formatDuration(startMinutes - 780)}`;
-    else if (startMinutes >= 901 && startMinutes <= 990)
-      earlyText = `✅ ${formatDuration(990 - startMinutes)}`;
+    // Đi trễ sáng: 07:30 (450) → 09:00 (540)
+    if (startMinutes >= 450 && startMinutes < 540) {
+      const min = Math.min(endMinutes, 540) - Math.max(startMinutes, 450);
+      if (min > 0) {
+        lateText = `✅ ${formatDuration(min)}`;
+      }
+    }
+
+    // Về sớm sáng: 09:01 (541) → 11:30 (690)
+    if (startMinutes >= 541 && startMinutes < 690) {
+      const min = Math.min(endMinutes, 690) - startMinutes;
+      if (min > 0) {
+        earlyText = `✅ ${formatDuration(min)}`;
+      }
+    }
+
+    // Đi trễ chiều: 13:01 (781) → 15:00 (900)
+    if (startMinutes >= 781 && startMinutes < 900) {
+      const min = Math.min(endMinutes, 900) - startMinutes;
+      if (min > 0) {
+        lateText = `✅ ${formatDuration(min)}`;
+      }
+    }
+
+    // Về sớm chiều: 15:01 (901) → 16:30 (990)
+    if (startMinutes >= 901 && startMinutes < 990) {
+      const min = Math.min(endMinutes, 990) - startMinutes;
+      if (min > 0) {
+        earlyText = `✅ ${formatDuration(min)}`;
+      }
+    }
 
     return {
       STT: index + 1,
-      "Tên biểu mẫu": item.form?.name || "",
+      "Mã số nhân viên":msnv,
       "Tiêu đề phiếu": item.title || "",
-      "Người tạo": submitter,
+      "Người đề nghị": submitter,
       "Ngày tạo": formatDateTime(item.created_at),
       "Thời gian bắt đầu": formatDateTime(timeStart),
       "Thời gian kết thúc": formatDateTime(timeEnd),
       "Trạng thái": getStatusLabel(item.status),
       "Đi trễ": lateText,
-      "Số lần đi trễ": lateText ? userCountMap[submitter]?.late || 0 : "",
+      "Số lần đi trễ": lateText ? 1 : "",
       "Về sớm": earlyText,
-      "Số lần về sớm": earlyText ? userCountMap[submitter]?.early || 0 : "",
+      "Số lần về sớm": earlyText ? 1 : "",
     };
   });
 

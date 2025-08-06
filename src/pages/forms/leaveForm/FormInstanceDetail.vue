@@ -1,5 +1,6 @@
 <template>
-  <a-modal :visible="visible" :footer="null" width="900px" wrap-class-name="modal-preview-fixed no-padding-modal":closable="false"@cancel="close">
+  <a-modal :visible="visible" :footer="null" width="900px" wrap-class-name="modal-preview-fixed no-padding-modal"
+    :closable="false" @cancel="close">
     <div class="print-area">
       <table class="form-header">
         <tbody>
@@ -92,10 +93,6 @@
                   <template v-if="step2Approved && step2HasSignature">
                     <div class="signature-wrapper">
                       <img :src="displaySignatureUrl" alt="Chữ ký quản lý" class="signature-image" />
-                      <div class="signature-overlay">
-                        <p v-if="step2ProcessedAt">{{ formatDateTime(step2ProcessedAt) }}</p>
-                        <p v-if="step2Comment">{{ step2Comment }}</p>
-                      </div>
                     </div>
                   </template>
 
@@ -103,10 +100,6 @@
                   <template v-else-if="step2Approved && !step2HasSignature">
                     <div class="signature-wrapper">
                       <img :src="acceptImg" alt="Chữ ký mặc định" class="signature-image" />
-                      <div class="signature-overlay">
-                        <p v-if="step2ProcessedAt">{{ formatDateTime(step2ProcessedAt) }}</p>
-                        <p v-if="step2Comment">{{ step2Comment }}</p>
-                      </div>
                     </div>
                   </template>
 
@@ -123,8 +116,6 @@
 
                 </div>
               </td>
-
-
               <!-- NGƯỜI ĐỀ NGHỊ -->
               <td class="center">
                 <strong>NGƯỜI ĐỀ NGHỊ</strong>
@@ -145,6 +136,10 @@
           </tbody>
         </table>
 
+      </div>
+      <div class="bottom-left-meta">
+        <p v-if="step2ProcessedAt">Thời gian ký duyệt: {{ formatDateTime(step2ProcessedAt) }}</p>
+        <p v-if="step2Comment">{{ step2Comment }}</p>
       </div>
     </div>
   </a-modal>
@@ -339,6 +334,15 @@ function close() {
 
 
 <style scoped>
+.bottom-left-meta {
+  position: absolute;
+  bottom: 0px;
+  left: 10px;
+  font-size: 12px;
+  color: red;
+  line-height: 0.4;
+}
+
 .print-area {
   font-family: Tahoma;
   background: white;
@@ -489,7 +493,7 @@ span {
   max-height: 80px;
 }
 
-.signature-overlay {
+/* .signature-overlay {
   position: absolute;
   bottom: 0px;
   right: -120px;
@@ -500,7 +504,7 @@ span {
   max-width: 262px;
   border-radius: 0px;
   color: red;
-}
+} */
 </style>
 <style>
 .no-padding-modal .ant-modal-body {

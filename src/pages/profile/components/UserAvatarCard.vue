@@ -30,7 +30,6 @@ const props = defineProps({
 })
 const avatar = computed(() => resolveStoragePath(props.user.avatar))
 
-console.log(props.user)
 const authStore = useAuthStore()
 const uploading = ref(false)
 

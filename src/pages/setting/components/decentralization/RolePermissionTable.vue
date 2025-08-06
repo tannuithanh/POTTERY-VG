@@ -1,4 +1,9 @@
 <template>
+    <a-card style="margin-bottom: 16px">
+        <a-form layout="inline">
+            <a-input v-model:value="searchKeyword" placeholder="Tìm kiếm..." allow-clear />
+        </a-form>
+    </a-card>
     <a-card>
         <div class="card-header flex justify-between items-center mb-4">
             <div class="section-title text-lg font-semibold">Danh sách người dùng phân quyền</div>
@@ -7,7 +12,7 @@
             </a-button>
         </div>
 
-        <a-table :dataSource="userRoleList" rowKey="id" bordered>
+        <a-table :dataSource="filteredUserRoleList" rowKey="id" bordered>
             <a-table-column title="Vai trò" dataIndex="role_name" key="role_name" />
             <a-table-column title="Tên người dùng" dataIndex="user_name" key="user_name" />
             <a-table-column title="Thao tác" key="action">
@@ -24,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import RolePermissionModal from './RolePermissionModal.vue'
 import permissionService from '@/services/permissionService'
 import { notification, Modal } from 'ant-design-vue'
@@ -35,6 +40,8 @@ defineProps({
     roles: Array,
     users: Array
 })
+
+const searchKeyword = ref('')
 
 const userRoleList = ref([])
 const showUserModal = ref(false)
@@ -73,28 +80,36 @@ const handleAssign = async (formData) => {
 
 // Delete logic (nếu có)
 const handleDelete = (record) => {
-  Modal.confirm({
-    title: 'Xác nhận xoá phân quyền?',
-    content: `Bạn có chắc chắn muốn xoá vai trò "${record.role_name}" khỏi người dùng "${record.user_name}"?`,
-    okText: 'Xoá',
-    okType: 'danger',
-    cancelText: 'Huỷ',
-    async onOk() {
-      try {
-        await permissionService.deleteUserRoll(record.id)
-        notification.success({
-          message: 'Xoá thành công',
-          description: `${record.user_name} đã được gỡ vai trò "${record.role_name}".`
-        })
-        await fetchUserRoles() // Gọi lại danh sách
-      } catch (err) {
-        notification.error({
-          message: 'Lỗi',
-          description: 'Không thể xoá phân quyền.'
-        })
-      }
-    }
-  })
+    Modal.confirm({
+        title: 'Xác nhận xoá phân quyền?',
+        content: `Bạn có chắc chắn muốn xoá vai trò "${record.role_name}" khỏi người dùng "${record.user_name}"?`,
+        okText: 'Xoá',
+        okType: 'danger',
+        cancelText: 'Huỷ',
+        async onOk() {
+            try {
+                await permissionService.deleteUserRoll(record.id)
+                notification.success({
+                    message: 'Xoá thành công',
+                    description: `${record.user_name} đã được gỡ vai trò "${record.role_name}".`
+                })
+                await fetchUserRoles() // Gọi lại danh sách
+            } catch (err) {
+                notification.error({
+                    message: 'Lỗi',
+                    description: 'Không thể xoá phân quyền.'
+                })
+            }
+        }
+    })
 }
+const filteredUserRoleList = computed(() => {
+    if (!searchKeyword.value) return userRoleList.value
+    const keyword = searchKeyword.value.toLowerCase()
+    return userRoleList.value.filter(item =>
+        item.role_name?.toLowerCase().includes(keyword) ||
+        item.user_name?.toLowerCase().includes(keyword)
+    )
+})
 
 </script>

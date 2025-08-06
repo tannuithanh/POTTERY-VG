@@ -31,9 +31,6 @@
           </div>
         </div>
       </a-layout-content>
-
-
-
       <!-- Footer -->
       <Footer />
     </a-layout>
