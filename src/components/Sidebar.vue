@@ -33,6 +33,15 @@
             <router-link to="/news_list_manager">Danh sách hồ sơ</router-link>
           </a-menu-item>
         </a-sub-menu>
+        <!-- <a-sub-menu key="meetings" :icon="h(CalendarOutlined)" title="Lịch họp">
+          <a-menu-item v-if="user.user?.is_admin || user.modules.some(m => m.code === 'meetings')" key="meeting_manage">
+            <router-link to="/meeting_manage">Quản lý lịch họp</router-link>
+          </a-menu-item>
+          <a-menu-item key="meeting_register">
+            <router-link to="/meeting_register">Đăng ký lịch họp</router-link>
+          </a-menu-item>
+        </a-sub-menu> -->
+
 
       </a-menu>
     </a-layout-sider>
@@ -40,7 +49,7 @@
 
 
 <script setup>
-import { HomeOutlined, IdcardOutlined, ProfileOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined, IdcardOutlined, ProfileOutlined, CalendarOutlined } from '@ant-design/icons-vue'
 import { useRoute } from 'vue-router'
 import { computed, ref, h } from 'vue'
 import { useAuthStore } from '@/stores/auth'

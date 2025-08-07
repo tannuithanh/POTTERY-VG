@@ -43,4 +43,9 @@ export const newsService = {
   latest() {
     return newsApi.get("/news/latest");
   },
+
+  // 📂 Lấy danh sách bảng tin theo hạng mục (có phân quyền)
+  getByCategory(categoryId) {
+    return newsApi.get(`/news/by-category/${categoryId}`);
+  },
 };

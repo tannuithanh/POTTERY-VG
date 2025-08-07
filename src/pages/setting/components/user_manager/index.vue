@@ -1,7 +1,6 @@
 <template>
     <UserSearch @filter="handleFilter" />
-    <UserTable :users="users" :currentUserId="currentUserId" :currentUserIdIsAdmin="currentUserIsAdmin"
-        @refresh="fetchUsers" />
+    <UserTable :users="users" :currentUserId="currentUserId"  @refresh="fetchUsers" />
 </template>
 
 <script setup>
@@ -13,7 +12,7 @@ import userService from '@/services/userService'
 const allUsers = ref([])
 const users = ref([])
 const currentUserId = ref(null)
-const currentUserIsAdmin = ref(false)
+
 
 const fetchUsers = async () => {
     try {
@@ -28,7 +27,6 @@ const fetchUsers = async () => {
 onMounted(() => {
     const currentUser = JSON.parse(localStorage.getItem('user'))
     currentUserId.value = currentUser?.id || null
-    currentUserIsAdmin.value = !!currentUser?.is_admin
     fetchUsers()
 })
 

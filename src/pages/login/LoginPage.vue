@@ -24,8 +24,11 @@
 
       <!-- Links -->
       <div class="text-center mt-2">
-        <a style="color: #c06252;" class="text-xs ">Quên mật khẩu?</a>
+        <router-link to="/forgot-password" style="color: #c06252;" class="text-xs">
+          Quên mật khẩu?
+        </router-link>
       </div>
+
     </a-card>
   </div>
 </template>

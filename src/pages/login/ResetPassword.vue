@@ -3,15 +3,21 @@
         <a-card class="login-card" :bordered="false">
             <img src="@/assets/images/logo.png" alt="Logo" class="logo" />
 
-            <div class="title">🔒 Khôi phục mật khẩu</div>
+            <div class="title">🔐 Đặt lại mật khẩu</div>
 
-            <a-form :model="form" layout="vertical" @submit.prevent="handleSubmit">
-                <a-form-item name="email">
-                    <a-input v-model:value="form.email" placeholder="Nhập email" size="large" allow-clear />
+            <a-form layout="vertical" @submit.prevent="handleSubmit">
+                <a-form-item name="password">
+                    <a-input-password v-model:value="form.password" placeholder="Mật khẩu mới" size="large"
+                        allow-clear />
+                </a-form-item>
+
+                <a-form-item name="password_confirmation">
+                    <a-input-password v-model:value="form.password_confirmation" placeholder="Xác nhận mật khẩu"
+                        size="large" allow-clear />
                 </a-form-item>
 
                 <a-button type="primary" html-type="submit" block :loading="loading" size="large">
-                    Gửi liên kết đặt lại mật khẩu
+                    Xác nhận thay đổi
                 </a-button>
             </a-form>
 
@@ -25,72 +31,80 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { ref, reactive } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { notification } from 'ant-design-vue'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
+const route = useRoute()
+const router = useRouter()
 
-const form = reactive({ email: '' })
+// Lấy token và email từ URL
+const token = route.query.token
+const email = route.query.email
+
+const form = reactive({
+    password: '',
+    password_confirmation: ''
+})
 const loading = ref(false)
-console.log(form)
-const isValidEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
 const handleSubmit = async () => {
-    if (!form.email) {
+    if (!form.password || !form.password_confirmation) {
         return notification.error({
             message: 'Lỗi',
-            description: 'Vui lòng nhập email',
-        });
+            description: 'Vui lòng nhập đầy đủ thông tin',
+        })
     }
 
-    if (!isValidEmail(form.email)) {
+    if (form.password.length < 8) {
         return notification.error({
             message: 'Lỗi',
-            description: 'Email không hợp lệ',
-        });
+            description: 'Mật khẩu phải có ít nhất 8 ký tự',
+        })
     }
 
-    loading.value = true;
+    if (form.password !== form.password_confirmation) {
+        return notification.error({
+            message: 'Lỗi',
+            description: 'Mật khẩu không khớp',
+        })
+    }
+
+    loading.value = true
     try {
-        const { success, message } = await auth.forgotPassword(form.email);
+        const res = await auth.resetPassword({
+            token,
+            email,
+            password: form.password,
+            password_confirmation: form.password_confirmation,
+        })
 
-        if (success) {
+        if (res.success) {
             notification.success({
                 message: 'Thành công',
-                description: message,
-            });
+                description: res.message,
+            })
+            router.push('/login')
         } else {
             notification.error({
                 message: 'Lỗi',
-                description: message || 'Có lỗi xảy ra. Vui lòng thử lại.',
-            });
+                description: res.message,
+            })
         }
     } catch (err) {
-        // Hiển thị tất cả lỗi chi tiết nếu có từ backend
-        const data = err.response?.data;
-
-        // Nếu backend trả về mảng lỗi (Laravel validation)
-        if (data?.errors) {
-            const messages = Object.values(data.errors).flat().join('\n');
-            notification.error({
-                message: 'Lỗi',
-                description: messages,
-            });
-        } else {
-            // Trả về 1 thông báo chung nếu không rõ lỗi
-            notification.error({
-                message: 'Lỗi',
-                description: data?.message || 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.',
-            });
-        }
+        notification.error({
+            message: 'Lỗi',
+            description: 'Đặt lại mật khẩu thất bại. Vui lòng thử lại.',
+        })
     } finally {
-        loading.value = false;
+        loading.value = false
     }
-};
+}
 
 </script>
+
 
 <style scoped>
 .login-wrapper {

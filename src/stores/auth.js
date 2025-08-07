@@ -122,5 +122,52 @@ export const useAuthStore = defineStore("auth", {
     async changePasswordFistTime(data) {
       return api.post("/change-password-first-time", data);
     },
+    // Gửi link khôi phục mật khẩu
+    async forgotPassword(email) {
+      try {
+        await api.post("/forgot-password", { email });
+        return {
+          success: true,
+          message: "Đã gửi liên kết đặt lại mật khẩu đến email.",
+        };
+      } catch (err) {
+        const rawMessage = err.response?.data?.message || "";
+        let message = "Đã xảy ra lỗi. Vui lòng thử lại.";
+
+        if (rawMessage.includes("can't find a user")) {
+          message = "Không tìm thấy người dùng với email này.";
+        } else if (rawMessage.includes("wait before retrying")) {
+          message =
+            "Bạn đã gửi quá nhiều yêu cầu. Vui lòng đợi một lúc rồi thử lại.";
+        } else if (rawMessage.includes("The email field is required")) {
+          message = "Vui lòng nhập địa chỉ email.";
+        } else if (
+          rawMessage.includes("The email must be a valid email address")
+        ) {
+          message = "Địa chỉ email không hợp lệ.";
+        }
+
+        return {
+          success: false,
+          message,
+        };
+      }
+    },
+
+    // Đặt lại mật khẩu mới với token từ email
+    async resetPassword(payload) {
+      try {
+        await api.post("/reset-password", payload);
+        return {
+          success: true,
+          message: "Đặt lại mật khẩu thành công.",
+        };
+      } catch (err) {
+        return {
+          success: false,
+          message: err.response?.data?.message || "Không thể đặt lại mật khẩu.",
+        };
+      }
+    },
   },
 });

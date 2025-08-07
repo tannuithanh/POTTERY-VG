@@ -2,6 +2,7 @@ import CreateNews from '@/pages/news/CreateNews.vue'
 import NewsList from '@/pages/news/NewsList.vue'
 import NewListManager from '@/pages/news/NewListManager.vue'
 import EditNewsForm from '@/pages/news/EditNewsForm.vue';
+import ViewAllNewsByCategory from '@/pages/news/viewAllNewsByCategory.vue';
 
 export default [
   {
@@ -9,6 +10,12 @@ export default [
     name: 'createNews',
     component: CreateNews,
     meta: { title: 'Tạo bảng tin', moduleCode: "news" },
+  },
+  {
+    path: '/viewAllCateGory/:id',
+    name: 'viewAllCateGory',
+    component: ViewAllNewsByCategory,
+    meta: { title: 'Danh sách bảng tin', moduleCode: "news" },
   },
   {
     path: '/news_list',

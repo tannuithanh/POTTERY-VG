@@ -50,7 +50,7 @@
 
                     <a-form-item label="Quyền truy cập">
                         <a-radio-group v-model:value="form.isAdmin">
-                            <a-radio :value="1" :disabled="!props.currentUserIdIsAdmin">Admin</a-radio>
+                            <a-radio :value="1" :disabled="!auth.user.is_admin">Admin</a-radio>
                             <a-radio :value="0">Người dùng thường</a-radio>
                         </a-radio-group>
                     </a-form-item>
@@ -67,13 +67,12 @@ import { message, notification } from 'ant-design-vue'
 import userService from '@/services/userService'
 import positionService from '@/services/positionSerivce'
 import departmentService from '@/services/departmentService'
-
-
+import { useAuthStore } from '@/stores/auth'
+const auth = useAuthStore()
 const props = defineProps({
     modelValue: Boolean,
     form: Object,
     isEdit: Boolean,
-    currentUserIdIsAdmin: Boolean
 })
 const emit = defineEmits(['update:modelValue', 'success'])
 const positions = ref([])
