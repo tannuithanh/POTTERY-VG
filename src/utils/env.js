@@ -11,3 +11,7 @@ export const storageUrlNews = import.meta.env.VITE_NEWS_STORAGE_URL
 
 //NOTIFICATIONS SERVICE
 export const notificationUrl = import.meta.env.VITE_NOTIFICATION_API_URL || '' 
+
+//MEETING SCHEDULE SERVICE
+export const meetingUrl = import.meta.env.VITE_MEETING_SHEDULE_API_URL || '' 
+export const storageMeeting = import.meta.env.VITE_MEETING_SCHEDULE_STORAGE_URL;

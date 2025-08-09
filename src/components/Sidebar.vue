@@ -33,16 +33,18 @@
             <router-link to="/news_list_manager">Danh sách hồ sơ</router-link>
           </a-menu-item>
         </a-sub-menu>
-        <!-- <a-sub-menu key="meetings" :icon="h(CalendarOutlined)" title="Lịch họp">
-          <a-menu-item v-if="user.user?.is_admin || user.modules.some(m => m.code === 'meetings')" key="meeting_manage">
-            <router-link to="/meeting_manage">Quản lý lịch họp</router-link>
+        <a-sub-menu key="meetings" :icon="h(CalendarOutlined)" title="Lịch họp">
+          <a-menu-item key="meeting-manager">
+            <router-link to="/meeting-manager">Quản lý lịch họp</router-link>
           </a-menu-item>
-          <a-menu-item key="meeting_register">
-            <router-link to="/meeting_register">Đăng ký lịch họp</router-link>
+          <a-menu-item key="create_meeting">
+            <router-link to="/create-meeting">Đăng ký lịch họp</router-link>
           </a-menu-item>
-        </a-sub-menu> -->
+          <a-menu-item key="meeting-calendar">
+            <router-link to="/meeting-calendar">Lịch tháng</router-link>
+          </a-menu-item>
 
-
+        </a-sub-menu>
       </a-menu>
     </a-layout-sider>
   </template>
@@ -67,7 +69,9 @@ const activeKey = computed(() => {
   if (path.startsWith('/create_news')) return 'create_news';
   if (path.startsWith('/news_list_manager')) return 'News-list_manager';
   if (path.startsWith('/news_list')) return 'news_list';
-
+  if (path.startsWith('/meeting-manager')) return 'meeting-manager';
+  if (path.startsWith('/create-meeting')) return 'create-meeting';
+  if (path.startsWith('/meeting-calendar')) return 'meeting-calendar';
   return '';
 });
 
