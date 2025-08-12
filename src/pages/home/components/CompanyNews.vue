@@ -1,23 +1,31 @@
 <template>
-  <div class="news-card">
-    <div class="header">
-      <span class="icon">📌</span>
-      <span class="title">Bảng tin công ty</span>
-    </div>
+  <a-card class="news-card" :bordered="true">
+    <template #title>
+      <div class="header">
+        <span class="icon">📰</span>
+        <span class="title">Bảng tin công ty</span>
+      </div>
+    </template>
+
     <p class="subtext">Những thông báo nội bộ mới nhất sẽ được hiển thị tại đây.</p>
 
-    <div v-for="item in newsList" :key="item.id" class="news-item">
-      <div class="top-row">
-        <strong>{{ item.title }}</strong>
-        <span>{{ item.date }}</span>
+    <div class="news-list">
+      <div v-for="item in newsList" :key="item.id" class="news-item" @click="openDetail(item)">
+        <div class="top-row">
+          <strong class="t-title">{{ item.title }}</strong>
+          <span class="t-date">{{ item.date }}</span>
+        </div>
+        <div class="bottom-row">
+          <a>→ Xem chi tiết</a>
+        </div>
       </div>
-      <div class="bottom-row">
-        <a @click="openDetail(item)">→ Xem chi tiết</a>
-      </div>
+
+      <a-empty v-if="!loading && !newsList.length" description="Chưa có thông báo" />
+      <a-skeleton v-if="loading" :active="true" :paragraph="{ rows: 2 }" />
     </div>
 
     <NewsDetailModal :news="selectedNews" v-model:visible="modalVisible" />
-  </div>
+  </a-card>
 </template>
 
 <script setup>
@@ -29,17 +37,21 @@ import NewsDetailModal from '@/pages/news/components/NewsDetailModal.vue'
 const newsList = ref([])
 const selectedNews = ref(null)
 const modalVisible = ref(false)
+const loading = ref(false)
 
 const fetchLatestNews = async () => {
   try {
+    loading.value = true
     const res = await newsService.latest()
-    const raw = res.data.data || []
+    const raw = res?.data?.data || []
     newsList.value = raw.map(item => ({
       ...item,
       date: dayjs(item.published_at).format('DD/MM/YYYY')
     }))
   } catch (err) {
     console.error('Không thể tải bảng tin mới nhất:', err)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -51,52 +63,85 @@ const openDetail = (item) => {
 onMounted(fetchLatestNews)
 </script>
 
-
 <style scoped>
+/* Card chiếm full chiều cao cột và cho phần list cuộn */
 .news-card {
-  background: #c06252;
-  padding: 16px;
-  border-radius: 12px;
-  color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Tiêu đề đồng bộ font-size với Ant Calendar header (~14-16px) */
 .header {
   display: flex;
   align-items: center;
-  font-weight: bold;
-  font-size: 20px;
-  margin-bottom: 4px;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.2;
 }
 
-.header .icon {
-  margin-right: 8px;
+.icon {
+  font-size: 18px;
 }
 
+/* Subtext nhẹ giống calendar */
 .subtext {
-  font-size: 14px;
-  margin-bottom: 16px;
-  color: #f9f3f1;
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0 0 10px;
 }
 
+/* Khu vực danh sách chiếm phần còn lại, có scroll khi dài */
+.news-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Item nhìn gọn như cell của calendar */
 .news-item {
-  background: white;
+  background: #fff;
+  border: 1px solid #f0f0f0;
   border-radius: 8px;
-  color: rgb(39, 38, 38);
-  padding: 8px 12px;
+  padding: 10px 12px;
   margin-bottom: 10px;
+  transition: box-shadow .15s ease, transform .05s ease;
+  cursor: pointer;
 }
 
+.news-item:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .06);
+  transform: translateY(-1px);
+}
+
+/* Typography đồng bộ: title 14px, date 12px, link 13px */
 .top-row {
   display: flex;
   justify-content: space-between;
-  font-size: 16px;
+  align-items: center;
+  gap: 8px;
+}
 
+.t-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.t-date {
+  font-size: 12px;
+  color: #9ca3af;
+  white-space: nowrap;
 }
 
 .bottom-row {
-  font-size: 14px;
-  color: #c06252;
-  margin-top: 4px;
+  margin-top: 6px;
+  font-size: 13px;
 }
+
+.bottom-row a {
+  color: #c06252;
+}
+
+/* tím trùng với dấu chấm lịch */
 </style>

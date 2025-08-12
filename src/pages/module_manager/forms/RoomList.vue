@@ -7,7 +7,7 @@
                 <a-button type="primary" @click="showModal = true">+ Thêm phòng họp</a-button>
             </div>
 
-            <a-table :columns="columns" :dataSource="meetingRooms" rowKey="id" bordered :loading="loading" />
+            <a-table :columns="columns" :dataSource="meetingRooms" rowKey="id" bordered :loading="loading"  :scroll="{ x: 500 }" />
 
             <!-- Modal thêm phòng họp -->
             <a-modal v-model:visible="showModal" title="Thêm phòng họp mới" @ok="handleAddRoom" ok-text="Lưu"

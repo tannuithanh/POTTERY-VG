@@ -51,6 +51,18 @@
                                 <router-link to="/news_list_manager">Danh sách hồ sơ</router-link>
                             </a-menu-item>
                         </a-sub-menu>
+
+                        <a-sub-menu key="meetings" :icon="h(CalendarOutlined)" title="Lịch họp">
+                            <a-menu-item key="meeting-manager">
+                                <router-link to="/meeting-manager">Quản lý lịch họp</router-link>
+                            </a-menu-item>
+                            <a-menu-item key="create_meeting">
+                                <router-link to="/create-meeting">Đăng ký lịch họp</router-link>
+                            </a-menu-item>
+                            <a-menu-item key="meeting-calendar">
+                                <router-link to="/meeting-calendar">Lịch</router-link>
+                            </a-menu-item>
+                        </a-sub-menu>
                     </a-menu>
 
                     <div class="mobile-user">
@@ -112,9 +124,10 @@ import {
     LogoutOutlined,
     KeyOutlined,
     InfoCircleOutlined,
-    AppstoreOutlined
+    AppstoreOutlined,
+    CalendarOutlined
 } from '@ant-design/icons-vue'
-import { ref } from 'vue'
+import { ref,h } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { notification } from 'ant-design-vue'

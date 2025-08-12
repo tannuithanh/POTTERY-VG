@@ -34,7 +34,7 @@
                 <div v-for="ev in dayList.items" :key="ev.id" class="more-item clickable" @click="openDetail(ev)">
                     <a-badge :status="badge(ev)" />
                     <span class="line">{{ ev.start.format('HH:mm') }}–{{ ev.end.format('HH:mm') }} · {{ ev.title
-                    }}</span>
+                        }}</span>
                 </div>
             </div>
         </a-modal>
@@ -98,14 +98,16 @@
                     </a-descriptions-item>
 
                     <a-descriptions-item label="Nơi ghi nhận">{{ detail.result_record_location || '—'
-                    }}</a-descriptions-item>
+                        }}</a-descriptions-item>
                     <a-descriptions-item label="Người tạo">{{ detail.created_by || '—' }}</a-descriptions-item>
                     <a-descriptions-item label="Tạo lúc">{{ detail.created_at || '—' }}</a-descriptions-item>
                 </a-descriptions>
 
                 <div class="mt-3 actions">
-                    <a-button type="primary" @click="goEdit(detail)">Sửa</a-button>
-                    <a-button v-if="isAdmin" danger class="ml-2" @click="confirmDelete(detail)">Xóa</a-button>
+                    <template v-if="detail && canModify(detail)">
+                        <a-button type="primary" @click="goEdit(detail)">Sửa</a-button>
+                        <a-button danger class="ml-2" @click="confirmDelete(detail)">Xóa</a-button>
+                    </template>
                 </div>
             </template>
         </a-modal>
@@ -113,13 +115,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, h, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import isBetween from 'dayjs/plugin/isBetween'
 import { notification, Modal } from 'ant-design-vue'
 import meetingService from '@/services/meeting_schedule_service/meetingService'
 import { resolveStoragePath } from '@/utils/storageMeeting'
+import { useAuthStore } from '@/stores/auth';
 
 dayjs.extend(isBetween)
 
@@ -128,7 +131,12 @@ const router = useRouter()
 const cursor = ref(dayjs())   // tháng đang xem
 const loading = ref(false)
 const isMobile = ref(false)
-const isAdmin = true
+const auth = useAuthStore() // <-- thêm
+const currentUser = computed(() => auth.user || null) // <-- thêm
+const isAdmin = computed(() => Number(currentUser.value?.is_admin) === 1) // <-- thay cho const isAdmin = true
+// Có quyền sửa/xóa nếu là admin hoặc là người tạo
+const canModify = (rec) =>
+    isAdmin.value || currentUser.value?.id === rec?.created_by_id;
 
 // cache theo tháng: { 'YYYY-MM': [rawMapped] }
 const monthCache = ref({})
@@ -155,13 +163,12 @@ function mapDetailFromApi(m) {
             .filter(Boolean)
 
     return {
-        // cho calendar
         id: m.id,
         title: m.title,
         room: m.room?.name ?? '',
-        start: d(m.start_at),
-        end: d(m.end_at),
-        // các trường “đầy đủ” như bảng
+        start: dayjs(m.start_at),
+        end: dayjs(m.end_at),
+
         date: dateStr,
         start_time: startTime,
         end_time: endTime,
@@ -177,10 +184,14 @@ function mapDetailFromApi(m) {
         result_record_location: m.result_location ?? '',
         created_by: m.created_by?.name ?? '',
         created_at: m.created_at ? dayjs(m.created_at).format('YYYY-MM-DD HH:mm') : '',
-        // trạng thái hiển thị badge
+
+        // 👇 thêm id người tạo để kiểm tra quyền
+        created_by_id: m.created_by?.id ?? m.created_by_id ?? m.created_by_user_id ?? m.created_by ?? null,
+
         level: m.level || m.status || 'processing',
     }
 }
+
 
 /** ===== Fetch theo tháng + cache ===== */
 function monthKey(val = cursor.value) { return d(val).format('YYYY-MM') }
