@@ -43,15 +43,29 @@
           <a-menu-item key="meeting-calendar">
             <router-link to="/meeting-calendar">Lịch tháng</router-link>
           </a-menu-item>
-
         </a-sub-menu>
+        <!-- <a-sub-menu key="cost-journal" :icon="h(BookOutlined)" title="Bút toán chi phí"> -->
+          <!-- Chi phí nội bộ có submenu con -->
+          <!-- <a-sub-menu key="internal-costs" title="Chi phí nội bộ">
+            <a-menu-item key="internal-add">
+              <router-link to="/expense-entry/internal-costs/add_costs">Thêm chi phí</router-link>
+            </a-menu-item>
+            <a-menu-item key="internal-list">
+              <router-link to="/expense-entry/internal-costs/costs_manager">Quản lý chi phí</router-link>
+            </a-menu-item>
+          </a-sub-menu> -->
+          <!-- Chi phí khách hàng giữ nguyên -->
+          <!-- <a-menu-item key="customer-costs">
+            <router-link to="/cost-journal/customer">Chi phí khách hàng</router-link>
+          </a-menu-item>
+        </a-sub-menu> -->
       </a-menu>
     </a-layout-sider>
   </template>
 
 
 <script setup>
-import { HomeOutlined, IdcardOutlined, ProfileOutlined, CalendarOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined, IdcardOutlined, ProfileOutlined, CalendarOutlined, BookOutlined } from '@ant-design/icons-vue'
 import { useRoute } from 'vue-router'
 import { computed, ref, h } from 'vue'
 import { useAuthStore } from '@/stores/auth'
@@ -72,6 +86,7 @@ const activeKey = computed(() => {
   if (path.startsWith('/meeting-manager')) return 'meeting-manager';
   if (path.startsWith('/create-meeting')) return 'create-meeting';
   if (path.startsWith('/meeting-calendar')) return 'meeting-calendar';
+  if (path.startsWith('/expense-entry/internal-costs/add_costs')) return 'internal-add';
   return '';
 });
 

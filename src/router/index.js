@@ -12,6 +12,7 @@ import moduleRoutes from "./modules/module.routes";
 import authRoutes from "./modules/auth.routes";
 import notifacationRoutes from "./modules/notifacation.routes";
 import meetingRoutes from "./modules/meeting.routes";
+import expenseentryRoutes from "./modules/expenseentry.routes";
 
 const routes = [
   {
@@ -24,7 +25,8 @@ const routes = [
       ...settingsRoutes,
       ...moduleRoutes,
       ...notifacationRoutes,
-      ...meetingRoutes
+      ...meetingRoutes,
+      ...expenseentryRoutes
     ],
   },
   ...authRoutes,

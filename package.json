@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare-media": "node tools/prepare-media.js",
+    "prebuild": "npm run prepare-media"
   },
   "dependencies": {
     "@tinymce/tinymce-vue": "^6.2.0",
@@ -38,8 +40,10 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",
+    "fast-glob": "^3.3.3",
     "less": "^4.4.0",
     "less-loader": "^12.3.0",
+    "sharp": "^0.34.3",
     "vite": "^7.0.0",
     "vite-plugin-vue-devtools": "^7.7.7"
   }

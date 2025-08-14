@@ -15,7 +15,7 @@ export default [
     path: '/viewAllCateGory/:id',
     name: 'viewAllCateGory',
     component: ViewAllNewsByCategory,
-    meta: { title: 'Danh sách bảng tin', moduleCode: "news" },
+    meta: { title: 'Danh sách bảng tin'},
   },
   {
     path: '/news_list',
