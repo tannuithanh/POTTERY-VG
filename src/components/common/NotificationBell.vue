@@ -14,7 +14,7 @@
                 <a-list :data-source="notifications.slice(0, 5)" :locale="{ emptyText: 'Không có thông báo' }"
                     item-layout="horizontal" class="notification-list">
                     <template #renderItem="{ item }">
-                        <a-list-item class="notification-item" :class="{ 'unread': !item.is_read }"
+                        <a-list-item class="notification-item" :class="{ unread: !item.is_read }"
                             @click="handleClick(item)">
                             <a-list-item-meta :title="item.title">
                                 <template #avatar>
@@ -29,38 +29,62 @@
                     </template>
                 </a-list>
 
-                <!-- Nút xem tất cả -->
                 <div class="see-all" @click="handleSeeAll">
                     Xem tất cả thông báo
                 </div>
             </div>
         </template>
     </a-dropdown>
-    <FormInstanceDetail v-if="selectedNotification" :visible="showGatePassModal" :form-instance="selectedNotification"
-        @close="showGatePassModal = false" />
-    <NewsDetailModal :visible="showNewsModal" :news="selectedNews" @update:visible="showNewsModal = $event" />
 
+    <!-- 🔸 Modal động cho FORM (tự chọn component theo form_code) -->
+    <component v-if="showDetail && selectedFormInstance" :is="detailComponent" :visible="showDetail"
+        :form-instance="selectedFormInstance" @close="showDetail = false" @updated="onDetailUpdated" />
+
+    <!-- 🔸 Modal tin tức -->
+    <NewsDetailModal :visible="showNewsModal" :news="selectedNews" @update:visible="showNewsModal = $event" />
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount  } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { BellOutlined } from '@ant-design/icons-vue'
-import notificationService from '@/services/notification_service/notificationService'
-import { formatDateTime } from '@/utils/formatDate'
 import { notification } from 'ant-design-vue'
-import { formInstanceService } from '@/services/form_service/formInstanceService'
-import FormInstanceDetail from '@/pages/forms/leaveForm/FormInstanceDetail.vue'
-import { newsService } from '@/services/news_service/newsService'
-import NewsDetailModal from '@/pages/news/components/NewsDetailModal.vue'
 import { useAuthStore } from '@/stores/auth'
 
-const auth = useAuthStore()
-const mainColor = '#c06252'
-const notifications = ref([])
+import notificationService from '@/services/notification_service/notificationService'
+import { formInstanceService } from '@/services/form_service/formInstanceService'
+import { newsService } from '@/services/news_service/newsService'
+import { formatDateTime } from '@/utils/formatDate'
 
+/* Components chi tiết cho từng loại form */
+import FormInstanceDetail from '@/pages/forms/leaveForm/FormInstanceDetail.vue'                // GateEntry
+import FormVehicleDispatchDetail from '@/pages/forms/vehicleDispatchForm/FormVehicleDispatchDetail.vue' // VehicleDispatch
+// Nếu có thêm form khác, import tương tự:
+// import LeaveFormDetail from '@/pages/forms/leaveForm/LeaveFormDetail.vue'
+
+const mainColor = '#c06252'
+const auth = useAuthStore()
+
+const notifications = ref([])
 const unreadCount = ref(0)
 
-// 🔄 Load thông báo từ API khi mounted
+/* Modal động cho forms */
+const showDetail = ref(false)
+const selectedFormInstance = ref(null)
+const selectedFormCode = ref('')
+
+/* Map form_code → component */
+const detailMap = {
+    GateEntry: FormInstanceDetail,
+    VehicleDispatch: FormVehicleDispatchDetail,
+    // LeaveForm: LeaveFormDetail,
+}
+const detailComponent = computed(() => detailMap[selectedFormCode.value] || FormInstanceDetail)
+
+/* Modal tin tức */
+const selectedNews = ref(null)
+const showNewsModal = ref(false)
+
+/* Fetch notifications */
 const fetchNotifications = async () => {
     try {
         const res = await notificationService.getAll()
@@ -71,57 +95,49 @@ const fetchNotifications = async () => {
     }
 }
 
+/* Avatar theo module + form_code */
 const getAvatar = (item) => {
     if (item.module === 'forms') {
-        return 'https://cdn-icons-png.flaticon.com/512/32/32205.png' // Icon form
+        switch (item.data?.form_code) {
+            case 'GateEntry':
+                return 'https://cdn-icons-png.flaticon.com/512/32/32205.png'
+            case 'VehicleDispatch':
+                return 'https://cdn-icons-png.flaticon.com/512/44/44266.png'
+            case 'LeaveForm':
+                return 'https://cdn-icons-png.flaticon.com/512/4221/4221830.png'
+            default:
+                return 'https://cdn-icons-png.flaticon.com/512/32/32205.png'
+        }
     }
     if (item.module === 'news') {
-        return 'https://png.pngtree.com/png-vector/20190725/ourlarge/pngtree-vector-newspaper-icon-png-image_1577280.jpg' // Icon news
+        return 'https://png.pngtree.com/png-vector/20190725/ourlarge/pngtree-vector-newspaper-icon-png-image_1577280.jpg'
     }
     if (item.module === 'user') {
-        return 'https://cdn-icons-png.flaticon.com/512/847/847969.png' // Icon user
+        return 'https://cdn-icons-png.flaticon.com/512/847/847969.png'
     }
-
-    // Ưu tiên avatar thật nếu có
-    return item.avatar || 'https://cdn-icons-png.flaticon.com/512/747/747376.png' // Default icon
+    return item.avatar || 'https://cdn-icons-png.flaticon.com/512/747/747376.png'
 }
 
-
-// 👇 Biến toàn cục để tránh bind nhiều lần
-let echoBound = false
-
+/* Realtime via Echo */
 onMounted(() => {
-  fetchNotifications()
-
-  // 👇 Rút lui nếu đã bind (hủy cũ + bind lại mới)
-  window.Echo.leave('notifications')
-
-  window.Echo.channel('notifications')
-    .listen('.RealtimeNotificationSent', (e) => {
-      if (e.notification.user_id !== auth.user.id) return
-      notification.info({
-        message: `🔔 ${e.notification.title}`,
-        description: e.notification.message,
-      })
-
-      fetchNotifications()
-    })
+    fetchNotifications()
+    window.Echo.leave('notifications') // clear bind cũ
+    window.Echo.channel('notifications')
+        .listen('.RealtimeNotificationSent', (e) => {
+            if (e.notification.user_id !== auth.user.id) return
+            notification.info({
+                message: `🔔 ${e.notification.title}`,
+                description: e.notification.message,
+            })
+            fetchNotifications()
+        })
 })
-
-
 
 onBeforeUnmount(() => {
-  // 👇 Dọn channel khi component bị hủy
-  window.Echo.leave('notifications')
-  echoBound = false
+    window.Echo.leave('notifications')
 })
 
-const selectedNotification = ref(null)
-const showGatePassModal = ref(false)
-
-const selectedNews = ref(null)
-const showNewsModal = ref(false)
-
+/* Click 1 notification */
 const handleClick = async (item) => {
     try {
         if (!item.is_read) {
@@ -130,19 +146,25 @@ const handleClick = async (item) => {
             unreadCount.value = notifications.value.filter(n => !n.is_read).length
         }
 
-        if (item.module === 'forms' && item.data?.form_code === 'GateEntry') {
+        if (item.module === 'forms') {
+            // lấy instance rồi chọn component theo form_code
+            const formCode = item.data?.form_code
             const res = await formInstanceService.getById(item.reference_id)
-            selectedNotification.value = res.data
-            showGatePassModal.value = true
 
-        } else if (item.module === 'news') {
+            selectedFormInstance.value = res.data
+            selectedFormCode.value = formCode || res.data?.form?.code || ''
+            showDetail.value = true
+            return
+        }
+
+        if (item.module === 'news') {
             const res = await newsService.getById(item.reference_id)
             selectedNews.value = res.data.data
             showNewsModal.value = true
-
-        } else {
-            window.location.href = item.link || '/'
+            return
         }
+
+        window.location.href = item.link || '/'
     } catch (err) {
         notification.error({
             message: 'Lỗi',
@@ -154,13 +176,16 @@ const handleClick = async (item) => {
 const handleSeeAll = () => {
     window.location.href = '/notifications'
 }
-</script>
 
+function onDetailUpdated() {
+    // nếu cần: refresh list sau khi duyệt/từ chối trong modal
+    fetchNotifications()
+}
+</script>
 
 <style scoped>
 .notification-item.unread {
     background-color: #fff7f0;
-    /* Màu nền nhẹ cho chưa đọc */
     font-weight: 500;
 }
 
@@ -182,9 +207,9 @@ const handleSeeAll = () => {
 .dropdown-box {
     width: 320px;
     max-height: 460px;
-    background: white;
+    background: #fff;
     border: 1px solid #f0f0f0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
     border-radius: 8px;
     padding: 10px;
 }

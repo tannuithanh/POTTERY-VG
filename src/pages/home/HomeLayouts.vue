@@ -178,7 +178,7 @@ onMounted(async () => {
     /* khoảng giữa khung */
     --r: 14px;
     /* bo góc ngoài */
-    --dur: 100s;
+    --dur: 400s;
     /* tốc độ chạy 1 vòng */
     position: relative;
     border-radius: var(--r);

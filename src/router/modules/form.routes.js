@@ -1,6 +1,7 @@
 import FormLayouts from "@/pages/forms/FormLayouts.vue";
 import LeaveForm from "@/pages/forms/leaveForm/LeaveForm.vue";
 import CheckFormCreat from "@/pages/forms/CheckFormCreat.vue";
+import VehicleDispatchForm from "@/pages/forms/vehicleDispatchForm/VehicleDispatchForm.vue";
 
 export default [
   {
@@ -15,6 +16,15 @@ export default [
         component: LeaveForm,
         meta: {
           title: "Biểu mẫu giấy ra vào cổng",
+          moduleCode: "form",
+        },
+      },
+      {
+        path: "vehicle_dispatch_form",
+        name: "vehicle_dispatch_form",
+        component: VehicleDispatchForm,
+        meta: {
+          title: "Biểu mẫu phiếu điều động xe",
           moduleCode: "form",
         },
       },

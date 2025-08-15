@@ -25,7 +25,7 @@
                                 <span>Trang chủ</span>
                             </router-link>
                         </a-menu-item>
-                        <a-sub-menu
+                        <a-sub-menu :icon="h(IdcardOutlined)"
                             v-if="authStore.user?.is_admin || authStore.user?.modules?.some(m => m.code === 'form')"
                             key="profile" title="Hồ sơ điện tử">
                             <a-menu-item key="forms_create">
@@ -36,7 +36,7 @@
                             </a-menu-item>
                         </a-sub-menu>
 
-                        <a-sub-menu key="news" title="Bảng tin">
+                        <a-sub-menu  :icon="h(ProfileOutlined)"  key="news" title="Bảng tin">
                             <a-menu-item
                                 v-if="authStore.user?.is_admin || authStore.user?.modules?.some(m => m.code === 'news')"
                                 key="create_news">
@@ -125,7 +125,9 @@ import {
     KeyOutlined,
     InfoCircleOutlined,
     AppstoreOutlined,
-    CalendarOutlined
+    CalendarOutlined,
+    IdcardOutlined,
+    ProfileOutlined
 } from '@ant-design/icons-vue'
 import { ref,h } from 'vue'
 import { useAuthStore } from '@/stores/auth'

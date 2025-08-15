@@ -3,9 +3,12 @@
     <!-- Button-style menu -->
     <div class="menu-buttons">
       <a-button class="custom-button" :class="{ active: selectedKey === 'leave_form' }" @click="goTo('leave_form')">
-        Tạo giấy ra vào cổng
+        Giấy ra vào cổng
       </a-button>
-
+      <a-button class="custom-button" :class="{ active: selectedKey === 'vehicle_dispatch_form' }"
+        @click="goTo('vehicle_dispatch_form')">
+        Phiếu đề nghị điều động xe
+      </a-button>
     </div>
     <hr>
     <!-- Nội dung biểu mẫu -->
@@ -70,5 +73,4 @@ const goTo = (key) => {
   color: #fff;
   border-color: #c06252;
 }
-
 </style>
