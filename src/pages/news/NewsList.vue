@@ -1,78 +1,72 @@
 <template>
-    <div>
-        <!-- =======================
-            THANH TÌM KIẾM
-            - v-model:value="query": bind dữ liệu search
-            - :loading="searching": hiện icon loading khi đang tìm
-            - allowClear: nút xóa
-            - enter-button: có nút enter
-            - @search="onSearchNow": gọi hàm tìm khi bấm enter/nút
-        ======================== -->
+    <div class="fx-root" :class="{ 'fx-ready': effectsReady }">
+        <!-- Ô tìm kiếm -->
         <a-input-search v-model:value="query" :loading="searching" allowClear enter-button
             placeholder="Tìm tin theo tiêu đề, nội dung hoặc danh mục…" @search="onSearchNow"
-            style="margin-bottom: 16px" />
+            style="margin-bottom: 16px" class="fx fx-up delay-1" />
 
-        <!-- =======================
-            KẾT QUẢ TÌM KIẾM
-            - Chỉ hiển thị khi isSearching = true (tức là đang có nội dung search)
-        ======================== -->
-        <div v-if="isSearching">
-            <!-- Có kết quả -->
-            <template v-if="searchResults.length">
-                <a-list :data-source="searchResults" item-layout="vertical">
-                    <!-- renderItem: cách hiển thị từng kết quả -->
-                    <template #renderItem="{ item }">
-                        <a-list-item :key="item.id">
-                            <div class="search-item">
-                                <!-- v-html để highlight -->
-                                <div class="search-title" v-html="highlight(item.title, query)"></div>
-                                <div class="search-meta">{{ formatDate(item.published_at) }}</div>
-                                <a-tag>{{ item.category?.name ?? 'Khác' }}</a-tag>
-                                <div class="search-action">
-                                    <!-- @click.prevent: mở modal chi tiết -->
-                                    <a @click.prevent="openDetail(item)">→ Xem chi tiết</a>
-                                </div>
-                            </div>
-                        </a-list-item>
-                    </template>
-                </a-list>
-            </template>
-            <!-- Không có kết quả -->
-            <a-empty description="Không tìm thấy kết quả phù hợp" />
-        </div>
+        <!-- ========== CHẾ ĐỘ TÌM KIẾM ========== -->
+        <div v-if="isSearching" class="search-wrap">
+            <!-- Skeleton khi đang searching -->
+            <div v-if="searching" class="sk-list">
+                <div v-for="n in 6" :key="'sk-' + n" class="sk-item"></div>
+            </div>
 
-        <!-- =======================
-            LƯỚI THEO DANH MỤC (MẶC ĐỊNH)
-            - Hiển thị khi không search
-        ======================== -->
-        <a-row v-else :gutter="[16, 16]">
-            <a-col v-for="group in groupedNews" :key="group.category.id" :xs="24" :sm="12" :md="8" :lg="6">
-                <a-card :bodyStyle="{ backgroundColor: '#c06252' }" bordered>
-                    <template #title>
-                        <div>
-                            <span style="font-size: 20px; color: white">{{ group.category.name }}</span>
-                        </div>
-                    </template>
-
-                    <!-- Có tin tức -->
-                    <div v-if="Array.isArray(group.news) && group.news.length">
-                        <div v-for="item in group.news" :key="`${group.category.id}-${item.id}`" class="news-item">
-                            <div><strong class="news-title">{{ item.title }}</strong></div>
-                            <div class="news-date">{{ formatDate(item.published_at) }}</div>
+            <!-- Kết quả -->
+            <template v-else>
+                <transition-group name="list" tag="div">
+                    <div v-for="(item, i) in searchResults" :key="`sr-${item.id}`" class="search-item fx fx-zoom-in"
+                        :style="staggerStyle(i, 50)">
+                        <div class="search-title" v-html="highlight(item.title, query)"></div>
+                        <div class="search-meta">{{ formatDate(item.published_at) }}</div>
+                        <a-tag :bordered="false">{{ item.category?.name ?? 'Khác' }}</a-tag>
+                        <div class="search-action">
                             <a @click.prevent="openDetail(item)">→ Xem chi tiết</a>
                         </div>
                     </div>
-                    <!-- Không có tin -->
-                    <a-empty style="color: white;" v-else :image="simpleImage" />
+                </transition-group>
 
-                    <!-- Nút xem tất cả -->
-                    <div style="text-align: right; margin-top: 10px;">
-                        <a @click="viewAll(group.category.id)" style="color: white; font-size: 13px;">
-                            <UnorderedListOutlined style="margin-right: 4px" />
-                            Xem tất cả
-                        </a>
-                    </div>
-                </a-card>
+                <!-- Không có kết quả -->
+                <a-empty v-if="!searchResults.length" description="Không tìm thấy kết quả phù hợp"
+                    class="fx fx-fade delay-2" />
+            </template>
+        </div>
+
+        <!-- ========== CHẾ ĐỘ NHÓM THEO DANH MỤC ========== -->
+        <a-row v-else :gutter="[16, 16]">
+            <a-col v-for="(group, gi) in groupedNews" :key="group.category.id" :xs="24" :sm="12" :md="8" :lg="6">
+                <div class="fx fx-rise" :style="staggerStyle(gi, 80)">
+                    <a-card :bodyStyle="{ backgroundColor: '#c06252' }" bordered>
+                        <template #title>
+                            <div class="cat-title">
+                                <span class="cat-name">{{ group.category.name }}</span>
+                            </div>
+                        </template>
+
+                        <!-- Có tin -->
+                        <div v-if="Array.isArray(group.news) && group.news.length">
+                            <transition-group name="fade-up" tag="div">
+                                <div v-for="(item, ii) in group.news" :key="`${group.category.id}-${item.id}`"
+                                    class="news-item fx fx-up" :style="staggerStyle(ii, 50)">
+                                    <div><strong class="news-title">{{ item.title }}</strong></div>
+                                    <div class="news-date">{{ formatDate(item.published_at) }}</div>
+                                    <a @click.prevent="openDetail(item)">→ Xem chi tiết</a>
+                                </div>
+                            </transition-group>
+                        </div>
+
+                        <!-- Không có tin -->
+                        <a-empty style="color: white;" v-else :image="simpleImage" />
+
+                        <!-- Nút xem tất cả -->
+                        <div class="see-all">
+                            <a @click="viewAll(group.category.id)" class="see-all-a">
+                                <UnorderedListOutlined style="margin-right: 4px" />
+                                Xem tất cả
+                            </a>
+                        </div>
+                    </a-card>
+                </div>
             </a-col>
         </a-row>
 
@@ -82,12 +76,9 @@
 </template>
 
 <script setup>
-/* =======================
-    IMPORT CẦN DÙNG
-======================= */
-import { ref, onMounted, computed, watchEffect } from "vue"
+import { ref, onMounted, computed, watchEffect, nextTick } from "vue"
 import { useRouter } from "vue-router"
-import { Empty, List, Tag } from "ant-design-vue"
+import { Empty } from "ant-design-vue"
 import { UnorderedListOutlined } from "@ant-design/icons-vue"
 import { newsService } from "@/services/news_service/newsService"
 import NewsDetailModal from "./components/NewsDetailModal.vue"
@@ -95,28 +86,25 @@ import NewsDetailModal from "./components/NewsDetailModal.vue"
 const router = useRouter()
 
 /* =======================
-    STATE CHÍNH
+   STATE
 ======================= */
-// Dữ liệu nhóm tin theo danh mục
 const groupedNews = ref([])
-// Tin được chọn để xem chi tiết
 const selectedNews = ref(null)
-// Trạng thái modal
 const modalVisible = ref(false)
-// Ảnh empty mặc định của Antd
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 
-/* =======================
-    STATE TÌM KIẾM
-======================= */
-const USE_SERVER_SEARCH = false // true nếu muốn tìm qua server
-const query = ref("") // nội dung người dùng nhập
-const searching = ref(false) // đang tìm
-const searchResults = ref([]) // kết quả
-const isSearching = computed(() => query.value.trim().length > 0) // đang ở chế độ tìm kiếm
+// Search
+const USE_SERVER_SEARCH = false
+const query = ref("")
+const searching = ref(false)
+const searchResults = ref([])
+const isSearching = computed(() => query.value.trim().length > 0)
+
+// Effects gate
+const effectsReady = ref(false)
 
 /* =======================
-    LOAD DỮ LIỆU BAN ĐẦU
+   LOAD
 ======================= */
 const loadGroupedNews = async () => {
     try {
@@ -125,25 +113,27 @@ const loadGroupedNews = async () => {
     } catch (error) {
         console.error("Lỗi khi tải bảng tin:", error)
         groupedNews.value = []
+    } finally {
+        // Bật hiệu ứng sau khi có dữ liệu (hoặc timeout fallback)
+        await nextTick()
+        effectsReady.value = true
     }
 }
 
 /* =======================
-    HÀM XỬ LÝ UI
+   UI HANDLERS
 ======================= */
-// Mở modal xem chi tiết
 const openDetail = (news) => {
     selectedNews.value = news
     modalVisible.value = true
 }
-// Xem tất cả tin của danh mục
 const viewAll = (categoryId) => {
     router.push({ name: 'viewAllCateGory', params: { id: categoryId } })
 }
+
 /* =======================
-    HÀM HỖ TRỢ
+   HELPERS
 ======================= */
-// Định dạng ngày dd/mm/yyyy
 const formatDate = (date) => {
     if (!date) return ""
     const d = new Date(date)
@@ -152,8 +142,6 @@ const formatDate = (date) => {
     const yyyy = d.getFullYear()
     return `${dd}/${mm}/${yyyy}`
 }
-
-// Bỏ dấu tiếng Việt
 const viNormalize = (s) =>
     (s ?? "")
         .toString()
@@ -162,41 +150,24 @@ const viNormalize = (s) =>
         .replace(/đ/g, "d")
         .replace(/Đ/g, "D")
         .toLowerCase()
-
-// Debounce đơn giản (trì hoãn hàm)
 let debounceTimer = null
 const debounce = (fn, ms = 300) => (...args) => {
     clearTimeout(debounceTimer)
     debounceTimer = setTimeout(() => fn(...args), ms)
 }
-
-// Render 1 item kết quả tìm kiếm (dùng h)
-const renderSearchItem = (item) =>
-    h(List.Item, { key: item.id }, {
-        default: () => [
-            h("div", { class: "search-item" }, [
-                h("div", { class: "search-title", innerHTML: highlight(item.title, query.value) }),
-                h("div", { class: "search-meta" }, formatDate(item.published_at)),
-                h(Tag, { bordered: false }, { default: () => item.category?.name ?? "Khác" }),
-                h("div", { class: "search-action" }, [
-                    h("a", { onClick: () => openDetail(item) }, "→ Xem chi tiết")
-                ])
-            ])
-        ]
-    })
-
-// Highlight phần khớp query trong text
 const escapeReg = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 const highlight = (text, q) => {
     if (!q) return text ?? ""
     const t = text ?? ""
-    const pattern = new RegExp(escapeReg(viNormalize(q)), "gi")
+    const nq = viNormalize(q)
+    // Dùng index theo chuỗi đã normalize để tìm vị trí, sau đó cắt theo t (gốc)
     const idx = viNormalize(t)
+    const pattern = new RegExp(escapeReg(nq), "gi")
     let out = "", i = 0, m
     while ((m = pattern.exec(idx)) !== null) {
         const start = m.index
         const end = start + m[0].length
-        out += t.slice(i, start) + `<mark>${t.slice(start, end)}</mark>`
+        out += t.slice(i, start) + `<mark class="mk-pulse">${t.slice(start, end)}</mark>`
         i = end
     }
     out += t.slice(i)
@@ -204,17 +175,20 @@ const highlight = (text, q) => {
 }
 
 /* =======================
-    HÀM TÌM KIẾM
+   SEARCH
 ======================= */
-// Tìm client-side
-const clientSearch = (q) => {
-    const nq = viNormalize(q)
+const flattenNews = () => {
     const flat = []
     for (const g of groupedNews.value) {
         const cat = g?.category
         const items = Array.isArray(g?.news) ? g.news : []
         for (const it of items) flat.push({ ...it, category: cat })
     }
+    return flat
+}
+const clientSearch = (q) => {
+    const nq = viNormalize(q)
+    const flat = flattenNews()
     const filtered = flat.filter((it) => {
         const title = viNormalize(it?.title)
         const content = viNormalize(it?.content || it?.description || "")
@@ -224,14 +198,10 @@ const clientSearch = (q) => {
     filtered.sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
     return filtered
 }
-
-// Tìm server-side
 const serverSearch = async (q) => {
     const res = await newsService.search({ q })
     return Array.isArray(res?.data?.data) ? res.data.data : []
 }
-
-// Gọi tìm kiếm
 const doSearch = async () => {
     const q = query.value.trim()
     if (!q) {
@@ -248,13 +218,9 @@ const doSearch = async () => {
         searching.value = false
     }
 }
-
-// Tìm có debounce
 const onSearchDebounced = debounce(doSearch, 300)
-// Tìm ngay khi bấm Enter
 const onSearchNow = () => doSearch()
 
-// Theo dõi query để tự tìm
 watchEffect(() => {
     const q = query.value.trim()
     if (q) onSearchDebounced()
@@ -262,15 +228,194 @@ watchEffect(() => {
 })
 
 /* =======================
-    LIFE CYCLE
+   LIFE CYCLE
 ======================= */
 onMounted(() => {
     loadGroupedNews()
 })
+
+/* =======================
+   FX helpers
+======================= */
+const staggerStyle = (i, step = 60) => ({ '--delay': `${i * step}ms` })
 </script>
 
 <style scoped>
-/* Style cho item tin */
+/* ======= FX system ======= */
+.fx-root {
+    position: relative;
+}
+
+.fx {
+    opacity: 0;
+    transform: translateY(6px);
+    will-change: transform, opacity;
+}
+
+.fx-ready .fx {
+    animation-fill-mode: both;
+    animation-duration: .7s;
+    animation-timing-function: cubic-bezier(.2, .8, .2, 1);
+}
+
+.fx-up {
+    animation-name: fx-up;
+}
+
+.fx-rise {
+    animation-name: fx-rise;
+}
+
+.fx-fade {
+    animation-name: fx-fade;
+    transform: none;
+}
+
+.fx-zoom-in {
+    animation-name: fx-zoom-in;
+    transform: scale(.96);
+}
+
+.delay-1 {
+    animation-delay: 60ms;
+}
+
+.delay-2 {
+    animation-delay: 160ms;
+}
+
+.fx-ready .fx-zoom-in {
+    animation-delay: var(--delay, 0ms);
+}
+
+.fx-ready .fx-up {
+    animation-delay: var(--delay, 0ms);
+}
+
+.fx-ready .fx-rise {
+    animation-delay: var(--delay, 0ms);
+}
+
+@keyframes fx-up {
+    0% {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fx-rise {
+    0% {
+        opacity: 0;
+        transform: translateY(16px) scale(.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fx-fade {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fx-zoom-in {
+    0% {
+        opacity: 0;
+        transform: scale(.94);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ======= TransitionGroup ======= */
+.list-enter-active,
+.list-leave-active {
+    transition: all .35s cubic-bezier(.2, .8, .2, 1);
+}
+
+.list-enter-from {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.list-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
+.fade-up-enter-active,
+.fade-up-leave-active {
+    transition: all .35s cubic-bezier(.2, .8, .2, 1);
+}
+
+.fade-up-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-up-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
+/* ======= Search skeleton ======= */
+.sk-list {
+    display: grid;
+    gap: 10px;
+}
+
+.sk-item {
+    height: 86px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #f3f4f6 0%, #edeff2 40%, #f3f4f6 80%);
+    background-size: 200% 100%;
+    animation: sk-move 1.2s ease-in-out infinite;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+}
+
+@keyframes sk-move {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ======= Cards & layout ======= */
+.cat-title .cat-name {
+    font-size: 20px;
+    color: white;
+    font-weight: 700;
+}
+
+.see-all {
+    text-align: right;
+    margin-top: 10px;
+}
+
+.see-all-a {
+    color: white;
+    font-size: 13px;
+}
+
+/* ======= Items ======= */
 .news-item {
     background: white;
     padding: 15px;
@@ -289,12 +434,12 @@ onMounted(() => {
     margin: 2px 0 6px;
 }
 
-/* Style cho item kết quả tìm kiếm */
 .search-item {
     background: #fff;
     padding: 14px;
     border-radius: 10px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+    margin-bottom: 10px;
 }
 
 .search-title {
@@ -313,11 +458,45 @@ onMounted(() => {
     font-size: 14px;
 }
 
-/* Màu nền highlight */
+/* Highlight mark + pulse */
 mark {
     background: #fff1b8;
     padding: 0 2px;
     border-radius: 3px;
 }
-</style>
 
+.mk-pulse {
+    animation: mk-pulse .8s ease-out both;
+}
+
+@keyframes mk-pulse {
+    0% {
+        box-shadow: inset 0 0 0 0 rgba(255, 193, 7, .0);
+    }
+
+    30% {
+        box-shadow: inset 0 0 0 100px rgba(255, 193, 7, .18);
+    }
+
+    100% {
+        box-shadow: inset 0 0 0 0 rgba(255, 193, 7, .0);
+    }
+}
+
+/* Tôn trọng người dùng không thích animation */
+@media (prefers-reduced-motion: reduce) {
+
+    .fx,
+    .fx-ready .fx,
+    .list-enter-active,
+    .list-leave-active,
+    .fade-up-enter-active,
+    .fade-up-leave-active,
+    .mk-pulse {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+</style>

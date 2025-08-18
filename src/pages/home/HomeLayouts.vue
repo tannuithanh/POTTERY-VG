@@ -1,27 +1,27 @@
 <template>
     <!-- 🎞️ Filmstrip banner -->
-    <a-card :bordered="false" style="margin-bottom:16px">
+    <a-card :bordered="false" style="margin-bottom:16px" class="fx-root" :class="{ 'fx-ready': effectsReady }">
         <!-- Header -->
-        <div class="section-header">
-            <span class="section-badge">
+        <div class="section-header fx fx-up delay-1">
+            <span class="section-badge fx fx-pop delay-2">
                 <CameraOutlined />
             </span>
             <div class="section-heading">
-                <h2 class="section-title">Hình ảnh hoạt động công ty</h2>
-                <p class="section-sub">Khoảnh khắc nổi bật từ công ty</p>
+                <h2 class="section-title fx fx-swipe delay-3">Hình ảnh hoạt động công ty</h2>
+                <p class="section-sub fx fx-fade delay-4">Khoảnh khắc nổi bật từ công ty</p>
             </div>
         </div>
 
         <!-- Filmstrip -->
-        <div class="cinema" @mouseenter="paused = true" @mouseleave="paused = false">
+        <div class="cinema fx fx-rise delay-5" @mouseenter="paused = true" @mouseleave="paused = false">
             <div class="edge-fade left"></div>
             <div class="edge-fade right"></div>
 
             <div class="reel">
                 <div class="strip" :class="{ paused }">
-                    <!-- dải 1 -->
-                    <div v-for="(s, i) in heroSlides" :key="'a-' + i" class="frame" :title="s.title"
-                        @click="openPreview(i)">
+                    <!-- dải 1 (stagger từng frame) -->
+                    <div v-for="(s, i) in heroSlides" :key="'a-' + i" class="frame fx fx-zoom-in"
+                        :style="staggerStyle(i)" :title="s.title" @click="openPreview(i)">
                         <picture>
                             <source :srcset="s.thumbAvif" type="image/avif" />
                             <source :srcset="s.thumbWebp" type="image/webp" />
@@ -29,6 +29,7 @@
                                 fetchpriority="low" />
                         </picture>
                     </div>
+
                     <!-- dải 2 (loop mượt) -->
                     <div v-for="(s, i) in heroSlides" :key="'b-' + i" class="frame" aria-hidden="true">
                         <picture>
@@ -63,16 +64,13 @@
 import { CameraOutlined } from '@ant-design/icons-vue'
 import CompanyNews from './components/CompanyNews.vue'
 import MyTodaySchedule from './components/MyTodaySchedule.vue'
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, nextTick } from 'vue'
 
-const router = useRouter()
-const go = (path) => { if (path) router.push(path) }
-
+/* ===== State ===== */
 const heroSlides = ref([])
 const paused = ref(false)
 
-// Preview control
+/* Preview control */
 const previewVisible = ref(false)
 const previewIndex = ref(0)
 const previewConfig = computed(() => ({
@@ -86,6 +84,27 @@ const openPreview = (idx) => {
     previewVisible.value = true
 }
 
+/* ===== Hiệu ứng hậu-load ===== */
+const effectsReady = ref(false)
+const STAGGER_MS = 60
+const MAX_WAIT = 1500
+const staggerStyle = (i) => ({ '--delay': `${i * STAGGER_MS}ms` })
+
+async function gentlyPreload(list) {
+    // Preload nhẹ 2–3 thumb đầu để bật hiệu ứng sớm
+    const first = list.slice(0, Math.min(3, list.length))
+    const loaders = first.map((s) => new Promise((res) => {
+        const im = new Image()
+        im.onload = im.onerror = () => res(true)
+        im.src = s.thumbWebp || s.thumbAvif
+    }))
+    const t = setTimeout(() => (effectsReady.value = true), MAX_WAIT)
+    await Promise.allSettled(loaders)
+    clearTimeout(t)
+    effectsReady.value = true
+}
+
+/* ===== Lifecycle ===== */
 onMounted(async () => {
     try {
         const res = await fetch('/home/manifest.json', { cache: 'no-cache' })
@@ -94,9 +113,18 @@ onMounted(async () => {
         heroSlides.value = arr
     } catch (e) {
         console.error(e)
-        heroSlides.value = [] // hoặc set fallback nếu cần
+        heroSlides.value = [] // fallback nếu cần
+    } finally {
+        // Bật hiệu ứng sau khi DOM cập nhật + dữ liệu sẵn sàng
+        await nextTick()
+        if (heroSlides.value.length) {
+            gentlyPreload(heroSlides.value)
+        } else {
+            effectsReady.value = true
+        }
     }
 
+    // Tự động pause khi filmstrip ra khỏi viewport
     const el = document.querySelector('.cinema')
     if (el) {
         const io = new IntersectionObserver(([ent]) => {
@@ -107,9 +135,203 @@ onMounted(async () => {
 })
 </script>
 
-
-
 <style scoped>
+/* ========= FX system (chỉ thêm, không đổi UI) ========= */
+.fx-root {
+    position: relative;
+}
+
+.fx {
+    opacity: 0;
+    transform: translateY(6px);
+    will-change: transform, opacity;
+}
+
+.fx-ready .fx {
+    animation-fill-mode: both;
+    animation-duration: 2s;
+    /* chậm gấp đôi */
+    animation-timing-function: cubic-bezier(.2, .8, .2, 1);
+}
+
+
+.fx-up {
+    animation-name: fx-up;
+}
+
+.fx-pop {
+    animation-name: fx-pop;
+    transform: none;
+}
+
+.fx-rise {
+    animation-name: fx-rise;
+}
+
+.fx-fade {
+    animation-name: fx-fade;
+    transform: none;
+}
+
+.fx-zoom-in {
+    animation-name: fx-zoom-in;
+    transform: scale(.96);
+}
+
+.delay-1 {
+    animation-delay: 60ms;
+}
+
+.delay-2 {
+    animation-delay: 140ms;
+}
+
+.delay-3 {
+    animation-delay: 240ms;
+}
+
+.delay-4 {
+    animation-delay: 340ms;
+}
+
+.delay-5 {
+    animation-delay: 440ms;
+}
+
+/* dải 1: stagger từng frame bằng custom prop --delay */
+.fx-ready .fx-zoom-in {
+    animation-delay: var(--delay, 0ms);
+}
+
+@keyframes fx-up {
+    0% {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Sửa lại fx-pop để giữ opacity sau khi kết thúc */
+@keyframes fx-pop {
+    0% {
+        opacity: 0;
+        transform: scale(.86);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.06);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+}
+
+
+@keyframes fx-rise {
+    0% {
+        opacity: 0;
+        transform: translateY(16px) scale(.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fx-fade {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fx-zoom-in {
+    0% {
+        opacity: 0;
+        transform: scale(.94);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Swipe reveal cho heading */
+.fx-swipe {
+    position: relative;
+    animation-name: fx-swipe;
+    transform: none;
+}
+
+.fx-ready .fx-swipe::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 -6px 0;
+    border-radius: 8px;
+    background: linear-gradient(90deg, rgba(192, 98, 82, .0), rgba(192, 98, 82, .35), rgba(192, 98, 82, .0));
+    opacity: 0;
+    pointer-events: none;
+    animation: fx-sheen 900ms 300ms ease forwards;
+}
+
+@keyframes fx-swipe {
+    0% {
+        opacity: 0;
+        clip-path: inset(0 100% 0 0);
+    }
+
+    100% {
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+@keyframes fx-sheen {
+    0% {
+        opacity: 0;
+        transform: translateX(-30%);
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(120%);
+    }
+}
+
+/* Tôn trọng người dùng không thích animation */
+@media (prefers-reduced-motion: reduce) {
+
+    .fx,
+    .fx-ready .fx {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .strip {
+        animation-duration: 999s;
+    }
+
+    /* làm chậm filmstrip */
+}
+
 /* ===== Section header (title có dấu ấn) ===== */
 .section-header {
     display: flex;
@@ -158,8 +380,7 @@ onMounted(async () => {
     right: 0;
     bottom: 0;
     height: 6px;
-    background:
-        linear-gradient(90deg, rgba(192, 98, 82, .25), rgba(192, 98, 82, .9) 40%, rgba(192, 98, 82, .25));
+    background: linear-gradient(90deg, rgba(192, 98, 82, .25), rgba(192, 98, 82, .9) 40%, rgba(192, 98, 82, .25));
     border-radius: 8px;
 }
 
@@ -169,8 +390,7 @@ onMounted(async () => {
     color: #6b7280;
 }
 
-/* ===== giữ style cũ cho 2 card ===== */
-/* ===== Cinematic filmstrip (đẹp hơn) ===== */
+/* ===== Cinematic filmstrip ===== */
 .cinema {
     --h: clamp(220px, 30vh, 420px);
     /* chiều cao khung */
@@ -187,7 +407,6 @@ onMounted(async () => {
     box-shadow: 0 10px 24px rgba(255, 255, 255, 0.25);
 }
 
-/* Mép fade trái/phải cho cảm giác băng phim trôi vô tận */
 .edge-fade {
     position: absolute;
     top: 0;
@@ -207,11 +426,9 @@ onMounted(async () => {
     background: linear-gradient(270deg, rgba(9, 11, 16, 1) 0%, rgba(9, 11, 16, 0) 100%);
 }
 
-/* Dải phim có “lỗ phim” ở trên/dưới bằng mask */
 .reel {
     position: relative;
     padding: 25px 0;
-    /* chừa chỗ cho thanh lỗ phim */
     overflow: hidden;
 }
 
@@ -224,7 +441,6 @@ onMounted(async () => {
     height: 22px;
     z-index: 2;
     background: linear-gradient(#c06252, #c06252);
-    /* đục lỗ */
     -webkit-mask: radial-gradient(circle 5px at 12px 50%, transparent 98%, #c06252 100%) repeat-x;
     mask: radial-gradient(circle 5px at 12px 50%, transparent 98%, #c06252 100%) repeat-x;
     -webkit-mask-size: 44px 22px;
@@ -240,7 +456,6 @@ onMounted(async () => {
     transform: scaleY(-1);
 }
 
-/* Dải chuyển động */
 .strip {
     display: flex;
     gap: var(--gap);
@@ -295,7 +510,7 @@ onMounted(async () => {
     filter: saturate(1.05) contrast(1.02);
 }
 
-/* Caption kính mờ */
+/* Caption kính mờ (nếu muốn bật) */
 .cap {
     position: absolute;
     left: 10px;

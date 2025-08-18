@@ -141,7 +141,6 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
 import { notification, Modal } from 'ant-design-vue'
@@ -152,11 +151,9 @@ import { resolveStoragePath } from '@/utils/storageMeeting' // nếu bạn có u
 
 dayjs.locale('vi')
 
-const router = useRouter()
 const auth = useAuthStore()
 const me = computed(() => auth.user || null)
 const myId = computed(() => me.value?.id ?? null)
-const isAdmin = computed(() => Number(me.value?.is_admin) === 1)
 
 const isMobile = ref(false)
 
@@ -273,26 +270,6 @@ function onSelect(d) { selectedDate.value = dayjs(d); loadDayList(selectedDate.v
 function onPanelChange(d) { panelDate.value = dayjs(d); loadMonthMarks(panelDate.value) }
 function reloadDay() { loadDayList(selectedDate.value) }
 
-/* Actions */
-function goEdit(rec) { router.push({ name: 'MeetingEdit', params: { id: rec.id } }) }
-async function confirmDelete(rec) {
-    Modal.confirm({
-        title: 'Xác nhận xóa lịch họp',
-        content: `Bạn có chắc muốn xóa lịch họp "${rec.title}"?`,
-        okText: 'Xóa', okType: 'danger', cancelText: 'Hủy',
-        async onOk() {
-            try {
-                await meetingRoomService.destroy(rec.id)
-                notification.success({ message: 'Đã xóa thành công' })
-                detail.value = null
-                await loadDayList(selectedDate.value)
-                await loadMonthMarks(panelDate.value)
-            } catch (e) {
-                notification.error({ message: 'Xóa thất bại', description: e?.response?.data?.message || e?.message })
-            }
-        }
-    })
-}
 
 /* wait for auth + responsive modal */
 watch(() => myIdStr.value, (val, oldVal) => {

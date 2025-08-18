@@ -57,47 +57,82 @@ async function onAvatarChange(e) {
 }
 </script>
 
-
 <style scoped>
+:root {
+  --brand: #c06252;
+}
+
+/* căn giữa tổng thể */
 .text-center {
   text-align: center;
 }
 
+/* khung avatar */
 .avatar-container {
   position: relative;
   display: inline-block;
   cursor: pointer;
+  transition: transform .25s ease, filter .25s ease;
+  will-change: transform;
 }
 
+.avatar-container:hover {
+  transform: translateY(-2px);
+}
+
+/* nâng cấp avatar: viền trắng + vòng ngoài màu thương hiệu + bóng mềm */
+.avatar-container :deep(.ant-avatar) {
+  border-radius: 999px !important;
+  box-shadow:
+    0 8px 20px rgba(192, 98, 82, .16),
+    0 0 0 3px #fff,
+    0 0 0 6px rgba(192, 98, 82, .20);
+  background: #fff;
+}
+
+/* nút overlay (sửa ảnh) kiểu fab mini */
 .avatar-overlay {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  padding: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  bottom: 6px;
+  right: 6px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(9, 11, 16, .75);
+  color: #fff;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, .25);
+  transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease, color .2s ease;
+  z-index: 2;
 }
 
 .avatar-overlay:hover {
-  background: #c06252;
-  color: white;
+  background: var(--brand);
+  color: #fff;
+  transform: scale(1.06);
+  box-shadow: 0 6px 16px rgba(192, 98, 82, .35);
 }
 
+/* khi đang upload thì vô hiệu hoá hover nhẹ */
+:deep(.ant-spin-nested-loading) {
+  display: inline-block;
+}
+
+/* tên & mã NV */
 .user-name {
   margin-top: 12px;
-  font-weight: bold;
+  font-weight: 800;
   font-size: 18px;
-  color: #c06252;
+  letter-spacing: .2px;
+  color: var(--brand);
 }
 
 .user-id {
-  color: #888;
+  color: #6b7280;
   font-size: 13px;
+  margin-top: 2px;
 }
 </style>

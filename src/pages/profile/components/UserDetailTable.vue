@@ -9,7 +9,7 @@
     <a-descriptions-item label="Mô tả công việc">{{ user.position_detail }}</a-descriptions-item>
     <a-descriptions-item label="Phòng ban">{{ user.department?.name || '—' }}</a-descriptions-item>
     <a-descriptions-item label="Quyền hạn">{{ user.is_admin ? 'Quản trị viên' : 'Người dùng thường'
-      }}</a-descriptions-item>
+    }}</a-descriptions-item>
   </a-descriptions>
 </template>
 
@@ -21,3 +21,4 @@ defineProps({
   }
 })
 </script>
+

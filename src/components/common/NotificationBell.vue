@@ -49,7 +49,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { BellOutlined } from '@ant-design/icons-vue'
 import { notification } from 'ant-design-vue'
 import { useAuthStore } from '@/stores/auth'
-
+import NewsDetailModal from '@/pages/news/components/NewsDetailModal.vue'
 import notificationService from '@/services/notification_service/notificationService'
 import { formInstanceService } from '@/services/form_service/formInstanceService'
 import { newsService } from '@/services/news_service/newsService'
