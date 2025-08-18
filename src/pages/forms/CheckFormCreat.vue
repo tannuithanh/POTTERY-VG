@@ -4,36 +4,19 @@
   </div>
 
   <a-card bordered>
-    <FormInstanceSearch
-      :forms="formFilterOptions"
-      @search="onSearch"
-      @export="exportToExcel"
-    />
+    <FormInstanceSearch :forms="formFilterOptions" @search="onSearch" @export="exportToExcel" />
 
-    <a-table
-      :columns="columns"
-      :data-source="filteredInstances"
-      :loading="loading"
-      row-key="id"
-      :pagination="{ pageSize: 10 }"
-      :scroll="{ x: 900 }"
-      class="fi-table"
-    />
+    <a-table :columns="columns" :data-source="filteredInstances" :loading="loading" row-key="id"
+      :pagination="{ pageSize: 10 }" :scroll="{ x: 900 }" class="fi-table" />
   </a-card>
 
   <!-- Modal chi tiết động -->
-  <component
-    v-if="selectedRecord"
-    :is="detailComponent"
-    :visible="isPreviewVisible"
-    :form-instance="selectedRecord"
-    @close="onDetailClosed"
-    @updated="onFormUpdated"
-  />
+  <component v-if="isPreviewVisible && selectedRecord" :key="detailKey" :is="detailComponent"
+    :visible="isPreviewVisible" :form-instance="selectedRecord" @close="onDetailClosed" @updated="onFormUpdated" />
 </template>
 
 <script setup>
-import { ref, onMounted, computed, h } from 'vue'
+import { ref, onMounted, computed, h, nextTick } from 'vue'
 import { Tag, Modal, notification, message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import isBetween from 'dayjs/plugin/isBetween'
@@ -43,16 +26,14 @@ import { formatDateTime } from '@/utils/formatDate'
 import TableActionButtons from '@/components/common/TableActionButtons.vue'
 import FormInstanceSearch from './FormInstanceSearch.vue'
 
-/** Detail components cho từng loại form */
-import FormInstanceDetail from './leaveForm/FormInstanceDetail.vue' // GateEntry detail
+/** Detail components */
+import FormInstanceDetail from './leaveForm/FormInstanceDetail.vue'
 import FormVehicleDispatchDetail from './vehicleDispatchForm/FormVehicleDispatchDetail.vue'
-
-/** Exporters – chỉ GateEntry hoạt động */
-import { exportFormInstanceToExcel } from '@/utils/export-helper'
+import MaterialGatepassDetail from './materialGatepassForm/MaterialGatepassDetail.vue'
 
 dayjs.extend(isBetween)
 
-/* STATE */
+/* ===== STATE ===== */
 const selectedRecord = ref(null)
 const isPreviewVisible = ref(false)
 const loading = ref(false)
@@ -60,14 +41,19 @@ const loading = ref(false)
 const allInstances = ref([])
 const filteredInstances = ref([])
 
-/* Options filter form */
+/* Force re-mount key cho modal chi tiết */
+const detailKey = ref(0)
+const bumpDetailKey = () => { detailKey.value += 1 }
+
+/* ===== Filter options ===== */
 const formFilterOptions = [
   { label: 'Tất cả', value: '' },
   { label: 'Giấy ra vào cổng', value: 'GateEntry' },
-  { label: 'Phiếu yêu cầu điều động xe', value: 'VehicleDispatch' }
+  { label: 'Phiếu yêu cầu điều động xe', value: 'VehicleDispatch' },
+  { label: 'Phiếu mang vật tư ra cổng', value: 'MaterialGatepass' },
 ]
 
-/* Quyền xoá */
+/* ===== Quyền xoá ===== */
 const authStore = useAuthStore()
 const canDeleteFormInstance = computed(() => {
   const user = authStore.user
@@ -76,20 +62,22 @@ const canDeleteFormInstance = computed(() => {
   return formModule?.actions?.includes('delete')
 })
 
-/* Cột bảng – gọn & responsive */
+/* ===== Cột bảng ===== */
 const columns = [
-  { title: 'Stt', key: 'index', customRender: ({ index }) => index + 1, width: 70},
-  { title: 'Biểu mẫu', dataIndex: ['form','name'], key: 'formName', width: 220, ellipsis: true },
+  { title: 'Stt', key: 'index', customRender: ({ index }) => index + 1, width: 70 },
+  { title: 'Biểu mẫu', dataIndex: ['form', 'name'], key: 'formName', width: 240, ellipsis: true },
   { title: 'Tiêu đề', dataIndex: 'title', key: 'title', ellipsis: true },
-  { title: 'Người tạo', dataIndex: ['submitter_info','name'], key: 'creatorName', width: 200, ellipsis: true },
+  { title: 'Người tạo', dataIndex: ['submitter_info', 'name'], key: 'creatorName', width: 200, ellipsis: true },
   {
     title: 'Trạng thái',
     dataIndex: 'status',
     key: 'status',
     width: 120,
     customRender: ({ text }) => {
-      const color = { pending: 'orange', approved: 'green', rejected: 'red' }[text] || 'blue'
-      const viText = { pending: 'Đang chờ', approved: 'Đã duyệt', rejected: 'Từ chối' }[text] || text
+      const colorMap = { pending: 'orange', approved: 'green', rejected: 'red', in_progress: 'blue' }
+      const viMap = { pending: 'Đang chờ', approved: 'Đã duyệt', rejected: 'Từ chối', in_progress: 'Đang xử lý' }
+      const color = colorMap[text] || 'blue'
+      const viText = viMap[text] || text
       return h(Tag, { color }, () => viText)
     }
   },
@@ -113,13 +101,16 @@ const columns = [
   }
 ]
 
-/* Tải danh sách – dùng formInstanceService hiện có */
+/* ===== Fetch list ===== */
 const fetchInstances = async () => {
   loading.value = true
   try {
     const res = await formInstanceService.getAll()
-    allInstances.value = res.data || []
-    filteredInstances.value = allInstances.value
+    const data = Array.isArray(res?.data) ? res.data
+      : Array.isArray(res?.data?.data) ? res.data.data
+        : res?.data?.items || []
+    allInstances.value = data
+    filteredInstances.value = data
   } catch (err) {
     message.error(`Lỗi khi tải danh sách phiếu: ${err?.response?.data?.message || err.message || 'Không rõ lỗi'}`)
   } finally {
@@ -127,25 +118,20 @@ const fetchInstances = async () => {
   }
 }
 
-/* Lọc theo formCode, status, keyword, dateRange – lọc client-side */
+/* ===== Search (client-side) ===== */
 const onSearch = (filters) => {
   const keyword = (filters.keyword || '').toLowerCase()
   const [startDate, endDate] = filters.dateRange || []
   const formCode = filters.formCode || ''
   const status = filters.status || ''
 
-  filteredInstances.value = allInstances.value.filter(item => {
+  filteredInstances.value = (allInstances.value || []).filter(item => {
     const matchKeyword =
       (item.title || '').toLowerCase().includes(keyword) ||
       (item.submitter_info?.name || '').toLowerCase().includes(keyword)
 
     const matchDateRange = (startDate && endDate)
-      ? dayjs(item.created_at).isBetween(
-          dayjs(startDate).startOf('day'),
-          dayjs(endDate).endOf('day'),
-          null,
-          '[]'
-        )
+      ? dayjs(item.created_at).isBetween(dayjs(startDate).startOf('day'), dayjs(endDate).endOf('day'), null, '[]')
       : true
 
     const matchForm = formCode ? (item.form?.code === formCode) : true
@@ -155,15 +141,14 @@ const onSearch = (filters) => {
   })
 }
 
-/* Export – chỉ GateEntry được hỗ trợ theo utils hiện tại */
+/* ===== Export (GateEntry only) ===== */
+import { exportFormInstanceToExcel } from '@/utils/export-helper'
 const exportToExcel = (filters) => {
   const list = filteredInstances.value
   if (!list.length) return message.info('Không có dữ liệu để xuất')
 
   const code = filters?.formCode
-
   if (!code || code === '') {
-    // Tất cả → chỉ xuất GateEntry (những loại khác chưa hỗ trợ)
     const gate = list.filter(x => x.form?.code === 'GateEntry')
     if (!gate.length) return message.info('Không có dữ liệu Giấy ra vào cổng để xuất')
     return exportFormInstanceToExcel(gate)
@@ -175,23 +160,25 @@ const exportToExcel = (filters) => {
     return exportFormInstanceToExcel(gate)
   }
 
-  // Các form khác (VD VehicleDispatch) – chưa hỗ trợ
   message.info('Chức năng xuất Excel hiện chỉ hỗ trợ Giấy ra vào cổng.')
 }
 
-/* View chi tiết động theo form code */
+/* ===== Detail component mapping ===== */
 const detailMap = {
-  GateEntry: FormInstanceDetail,              // modal giấy ra vào cổng
-  VehicleDispatch: FormVehicleDispatchDetail, // modal điều động xe
+  GateEntry: FormInstanceDetail,
+  VehicleDispatch: FormVehicleDispatchDetail,
+  MaterialGatepass: MaterialGatepassDetail,
 }
 const detailComponent = computed(() => {
   const code = selectedRecord.value?.form?.code
   return code ? (detailMap[code] || FormInstanceDetail) : FormInstanceDetail
 })
 
+/* ===== Handlers ===== */
 function handleView(record) {
   selectedRecord.value = record
   isPreviewVisible.value = true
+  bumpDetailKey() // để lần sau luôn re-mount
 }
 
 async function handleDelete(record) {
@@ -209,29 +196,42 @@ async function handleDelete(record) {
     })
 
     const res = await formInstanceService.deleteFormInstance(record.id)
-    notification.success({ message: 'Thành công', description: res.data.message })
-    fetchInstances()
+    notification.success({ message: 'Thành công', description: res?.data?.message || 'Đã xoá phiếu' })
+
+    // 👉 luôn đóng & unmount modal chi tiết
+    isPreviewVisible.value = false
+    selectedRecord.value = null
+    await nextTick()
+    bumpDetailKey()
+
+    // 👉 quét sạch mọi modal treo (kể cả confirm)
+    Modal.destroyAll()
+
+    await fetchInstances()
   } catch (err) {
-    if (err.message === 'Huỷ xoá') {
+    if (err?.message === 'Huỷ xoá') {
       notification.info({ message: 'Hủy xóa', description: 'Đã huỷ thao tác xoá' })
     } else {
       notification.error({
         message: 'Lỗi',
-        description: err?.response?.data?.message || 'Lỗi không xác định khi xoá phiếu'
+        description: err?.response?.data?.message || err?.message || 'Lỗi không xác định khi xoá phiếu'
       })
     }
   }
 }
 
+
 function onDetailClosed() {
   isPreviewVisible.value = false
   selectedRecord.value = null
+  bumpDetailKey()
 }
+
 function onFormUpdated() {
   fetchInstances()
 }
 
-/* INIT */
+/* ===== INIT ===== */
 onMounted(fetchInstances)
 </script>
 

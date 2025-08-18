@@ -15,4 +15,13 @@ export const formApprovalService = {
   rejectVehicleDispatchStep(stepId, payload) {
     return formApi.post(`/vehicle-dispatch/${stepId}/reject`, payload);
   },
+
+  approveMaterialGatepass(stepId, payload = {}) {
+    // payload (tuỳ trường hợp nhiều bước): { comment?, next_approver_id? }
+    return formApi.post(`/material-gatepass/${stepId}/approve`, payload);
+  },
+  rejectMaterialGatepass(stepId, payload = {}) {
+    // payload: { comment? }
+    return formApi.post(`/material-gatepass/${stepId}/reject`, payload);
+  },
 };

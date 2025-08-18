@@ -9,6 +9,10 @@
         @click="goTo('vehicle_dispatch_form')">
         Phiếu đề nghị điều động xe
       </a-button>
+      <a-button class="custom-button" :class="{ active: selectedKey === 'material_gatepass_form' }"
+        @click="goTo('material_gatepass_form')">
+        Phiếu mang vật tư ra cổng
+      </a-button>
     </div>
     <hr>
     <!-- Nội dung biểu mẫu -->

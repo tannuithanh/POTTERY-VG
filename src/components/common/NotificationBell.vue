@@ -59,7 +59,7 @@ import { formatDateTime } from '@/utils/formatDate'
 import FormInstanceDetail from '@/pages/forms/leaveForm/FormInstanceDetail.vue'                // GateEntry
 import FormVehicleDispatchDetail from '@/pages/forms/vehicleDispatchForm/FormVehicleDispatchDetail.vue' // VehicleDispatch
 // Nếu có thêm form khác, import tương tự:
-// import LeaveFormDetail from '@/pages/forms/leaveForm/LeaveFormDetail.vue'
+import MaterialGatepassDetail from '@/pages/forms/materialGatepassForm/MaterialGatepassDetail.vue'
 
 const mainColor = '#c06252'
 const auth = useAuthStore()
@@ -76,7 +76,7 @@ const selectedFormCode = ref('')
 const detailMap = {
     GateEntry: FormInstanceDetail,
     VehicleDispatch: FormVehicleDispatchDetail,
-    // LeaveForm: LeaveFormDetail,
+    MaterialGatepass: MaterialGatepassDetail,
 }
 const detailComponent = computed(() => detailMap[selectedFormCode.value] || FormInstanceDetail)
 
@@ -102,9 +102,9 @@ const getAvatar = (item) => {
             case 'GateEntry':
                 return 'https://cdn-icons-png.flaticon.com/512/32/32205.png'
             case 'VehicleDispatch':
+                return 'https://cdn-icons-png.flaticon.com/512/3664/3664538.png'
+            case 'MaterialGatepass':
                 return 'https://cdn-icons-png.flaticon.com/512/44/44266.png'
-            case 'LeaveForm':
-                return 'https://cdn-icons-png.flaticon.com/512/4221/4221830.png'
             default:
                 return 'https://cdn-icons-png.flaticon.com/512/32/32205.png'
         }

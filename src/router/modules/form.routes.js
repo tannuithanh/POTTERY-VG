@@ -2,6 +2,7 @@ import FormLayouts from "@/pages/forms/FormLayouts.vue";
 import LeaveForm from "@/pages/forms/leaveForm/LeaveForm.vue";
 import CheckFormCreat from "@/pages/forms/CheckFormCreat.vue";
 import VehicleDispatchForm from "@/pages/forms/vehicleDispatchForm/VehicleDispatchForm.vue";
+import MaterialGatepassForm from "@/pages/forms/materialGatepassForm/materialGatepassForm.vue";
 
 export default [
   {
@@ -28,6 +29,15 @@ export default [
           moduleCode: "form",
         },
       },
+      {
+        path: 'material_gatepass_form',
+        name: 'MaterialGatepassForm',
+        component: MaterialGatepassForm,
+        meta: {
+          title: "Biểu mẫu phiếu mang vật tư ra cổng",
+          moduleCode: "form",
+        },
+      }
     ],
   },
   {

@@ -25,5 +25,10 @@ export const formInstanceService = {
     return formApi.post("/vehicle-dispatch", data);
   },
 
+  // --- Material Gatepass (Mang vật tư ra cổng) ---
+  createMaterialGatepass(data) {
+    // data: { doc_date, requester_id, carrier_id, vehicle_plate, item_name, quantity, reason, approver_id }
+    return formApi.post("/material-gatepass", data);
+  },
 
 };
