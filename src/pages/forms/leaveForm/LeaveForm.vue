@@ -52,7 +52,7 @@
             </a-form-item>
 
             <!-- CHANGED: Ghi chú (không bắt buộc) -->
-            <a-form-item label="Ghi chú (tuỳ chọn)">
+            <a-form-item label="Ghi chú">
             <a-textarea v-model:value="formState.note" rows="3" allow-clear />
             </a-form-item>
 
