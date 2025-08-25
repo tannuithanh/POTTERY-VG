@@ -60,7 +60,13 @@
 
         <div class="row">
           <div class="col">
-            <label>- Lý do</label><span>: {{ data.reason }}</span>
+            <label>- Lý do:</label><span>: {{ purposeLabel }}</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label>- Ghi chú</label><span>: {{ noteText }}</span>
           </div>
         </div>
 
@@ -165,7 +171,6 @@ const props = defineProps({
 const emit = defineEmits(['close', 'updated'])
 
 const data = computed(() => props.formInstance?.data || {})
-
 // Giả sử created_at là ISO string từ backend
 const createdAt = computed(() => new Date(props.formInstance?.created_at))
 
@@ -181,8 +186,19 @@ const createdYear = computed(() => createdAt.value.getFullYear())
 
 
 
-const fromDateFormatted = formatDateTime(data.value.fromDate)
-const toDateFormatted = formatDateTime(data.value.toDate)
+const fromDateFormatted = computed(() => formatDateTime(data.value?.fromDate))
+const toDateFormatted   = computed(() => formatDateTime(data.value?.toDate))
+
+// Hiển thị label cho mục đích
+const purposeLabel = computed(() => {
+  const v = data.value?.purposeType
+  if (v === 'company')  return 'Việc công ty'
+  if (v === 'personal') return 'Việc cá nhân'
+  return '—'
+})
+
+// Tương thích ngược: ưu tiên note, fallback reason
+const noteText = computed(() => data.value?.note || data.value?.reason || '')
 
 /* ──────────────────────────────────────────────────────────────
   II. THÔNG TIN NGƯỜI DÙNG ĐĂNG NHẬP
