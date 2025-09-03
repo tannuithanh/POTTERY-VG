@@ -41,7 +41,7 @@
             <label>Bộ phận</label><span>: {{ data.department }}</span>
           </div>
           <div class="col">
-            <label>Chức vụ</label><span>: {{ data.position }}</span>
+            <label>Chức vụ</label><span>: {{ data.position_detail }}</span>
           </div>
         </div>
 
@@ -105,8 +105,10 @@ const props = defineProps({
   data: Object,
   managers: Array,
 })
+
 const purposeLabel = computed(() => {
   const v = props.data?.purposeType
+  
   if (v === 'personal') return 'Việc cá nhân'
   if (v === 'company') return 'Việc công ty'
   return '[Chưa chọn]'

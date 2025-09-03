@@ -41,7 +41,7 @@
             <label>Bộ phận</label><span>: {{ props.formInstance.submitter_info.department.name }}</span>
           </div>
           <div class="col">
-            <label>Chức vụ</label><span>: {{ props.formInstance.submitter_info.position.name }}</span>
+            <label>Chức vụ</label><span>: {{ props.formInstance.submitter_info.position_detail }}</span>
           </div>
         </div>
 
@@ -167,7 +167,6 @@ const props = defineProps({
   visible: Boolean,
   formInstance: Object,
 })
-
 const emit = defineEmits(['close', 'updated'])
 
 const data = computed(() => props.formInstance?.data || {})

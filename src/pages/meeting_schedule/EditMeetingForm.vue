@@ -115,7 +115,7 @@
                 <a-form-item label="Tệp đính kèm" name="attachment">
                     <a-upload :beforeUpload="beforeUpload" :maxCount="1" :multiple="false" :showUploadList="true"
                         :fileList="fileList" @remove="onRemoveFile">
-                        <a-button icon="upload">Tải lên (Tối đa 8MB)</a-button>
+                        <a-button>Đính kèm File</a-button>
                     </a-upload>
                     <div v-if="existingFileUrl && !fileList.length" class="mt-1 text-xs">
                         File hiện có:

@@ -35,8 +35,16 @@ function getStatusLabel(status) {
       pending: "Đang chờ",
       approved: "Đã duyệt",
       rejected: "Từ chối",
+      in_progress: "Đang xử lý",
     }[status] || status
   );
+}
+
+// NEW: map purposeType -> nhãn tiếng Việt
+function getPurposeLabel(purposeType) {
+  if (purposeType === "personal") return "Việc cá nhân";
+  if (purposeType === "company") return "Việc công ty";
+  return "";
 }
 
 export function exportFormInstanceToExcel(data) {
@@ -47,7 +55,7 @@ export function exportFormInstanceToExcel(data) {
 
   const exportData = data.map((item, index) => {
     const submitter = item.submitter_info?.name || "Không rõ";
-    const msnv = item.submitter_info?.msnv
+    const msnv = item.submitter_info?.msnv || "";
     const timeStart = item.data?.fromDate;
     const timeEnd = item.data?.toDate;
 
@@ -57,47 +65,52 @@ export function exportFormInstanceToExcel(data) {
     let lateText = "";
     let earlyText = "";
 
-    // Đi trễ sáng: 07:30 (450) → 09:00 (540)
-    if (startMinutes >= 450 && startMinutes < 540) {
-      const min = Math.min(endMinutes, 540) - Math.max(startMinutes, 450);
-      if (min > 0) {
-        lateText = `✅ ${formatDuration(min)}`;
+    // Bảo vệ khi thiếu thời gian
+    if (typeof startMinutes === "number" && typeof endMinutes === "number") {
+      // Đi trễ sáng: 07:30 (450) → 09:00 (540)
+      if (startMinutes >= 450 && startMinutes < 540) {
+        const min = Math.min(endMinutes, 540) - Math.max(startMinutes, 450);
+        if (min > 0) lateText = `✅ ${formatDuration(min)}`;
+      }
+
+      // Về sớm sáng: 09:01 (541) → 11:30 (690)
+      if (startMinutes >= 541 && startMinutes < 690) {
+        const min = Math.min(endMinutes, 690) - startMinutes;
+        if (min > 0) earlyText = `✅ ${formatDuration(min)}`;
+      }
+
+      // Đi trễ chiều: 13:01 (781) → 15:00 (900)
+      if (startMinutes >= 781 && startMinutes < 900) {
+        const min = Math.min(endMinutes, 900) - startMinutes;
+        if (min > 0) lateText = `✅ ${formatDuration(min)}`;
+      }
+
+      // Về sớm chiều: 15:01 (901) → 16:30 (990)
+      if (startMinutes >= 901 && startMinutes < 990) {
+        const min = Math.min(endMinutes, 990) - startMinutes;
+        if (min > 0) earlyText = `✅ ${formatDuration(min)}`;
       }
     }
 
-    // Về sớm sáng: 09:01 (541) → 11:30 (690)
-    if (startMinutes >= 541 && startMinutes < 690) {
-      const min = Math.min(endMinutes, 690) - startMinutes;
-      if (min > 0) {
-        earlyText = `✅ ${formatDuration(min)}`;
-      }
-    }
-
-    // Đi trễ chiều: 13:01 (781) → 15:00 (900)
-    if (startMinutes >= 781 && startMinutes < 900) {
-      const min = Math.min(endMinutes, 900) - startMinutes;
-      if (min > 0) {
-        lateText = `✅ ${formatDuration(min)}`;
-      }
-    }
-
-    // Về sớm chiều: 15:01 (901) → 16:30 (990)
-    if (startMinutes >= 901 && startMinutes < 990) {
-      const min = Math.min(endMinutes, 990) - startMinutes;
-      if (min > 0) {
-        earlyText = `✅ ${formatDuration(min)}`;
-      }
-    }
+    // NEW: lý do và ghi chú
+    const purposeType = item.data?.purposeType; // 'personal' | 'company'
+    const lyDo = getPurposeLabel(purposeType); // cột "Lý do"
+    const ghiChu = item.data?.note ?? item.data?.reason ?? ""; // cột "Ghi chú" (ưu tiên note, fallback reason cũ)
 
     return {
       STT: index + 1,
-      "Mã số nhân viên":msnv,
+      "Mã số nhân viên": msnv,
       "Tiêu đề phiếu": item.title || "",
       "Người đề nghị": submitter,
       "Ngày tạo": formatDateTime(item.created_at),
       "Thời gian bắt đầu": formatDateTime(timeStart),
       "Thời gian kết thúc": formatDateTime(timeEnd),
       "Trạng thái": getStatusLabel(item.status),
+
+      // NEW: hai cột yêu cầu
+      "Lý do": lyDo,
+      "Ghi chú": ghiChu,
+
       "Đi trễ": lateText,
       "Số lần đi trễ": lateText ? 1 : "",
       "Về sớm": earlyText,
@@ -108,6 +121,7 @@ export function exportFormInstanceToExcel(data) {
   const worksheet = XLSX.utils.json_to_sheet(exportData);
   const workbook = XLSX.utils.book_new();
 
+  // Tính độ rộng cột tự động
   const colWidths = [];
   const keys = Object.keys(exportData[0]);
   keys.forEach((key) => {

@@ -63,8 +63,58 @@
                 <span class="dots">{{ data.reason || '' }}</span>
             </div>
 
-            <!-- 4 Ô KÝ DUYỆT -->
-            <table class="signatures-table">
+            <!-- BẢNG KÝ DUYỆT: PHẾ LIỆU = 2 Ô ; THƯỜNG = 4 Ô -->
+            <table class="signatures-table" v-if="isScrap">
+                <tbody>
+                    <tr>
+                        <!-- Ô 2: Phê duyệt (bước 3 - cuối) -->
+                        <td class="center">
+                            <strong>Phê duyệt</strong>
+                            <template v-if="canApproveStep3">
+                                <div class="signature" style="gap:10px; text-align:left; width:100%;">
+                                    <!-- Phế liệu: không có người duyệt kế tiếp, không cần chọn next approver -->
+                                    <div style="display:flex; gap:8px; justify-content:center; margin-top:10px;">
+                                        <a-button type="primary" :loading="approving"
+                                            @click="actions.approveStep(3)">Đồng ý</a-button>
+                                        <a-button danger :loading="rejecting" @click="actions.rejectStep(3)">Từ
+                                            chối</a-button>
+                                    </div>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <div class="signature">
+                                    <template v-if="stampFor(step3View).img">
+                                        <img :src="stampFor(step3View).img" :alt="stampFor(step3View).alt"
+                                            class="signature-image" />
+                                    </template>
+                                    <template v-else>
+                                        <div class="no-signature">{{ stateText(step3View.state) }}</div>
+                                    </template>
+                                    <div class="signature-name">{{ step3View.name || '—' }}</div>
+                                </div>
+                            </template>
+                        </td>
+
+                        <!-- Ô 1: Người đề nghị -->
+                        <td class="center">
+                            <strong>Người đề nghị</strong>
+                            <div class="signature">
+                                <template v-if="submitterSignature.url">
+                                    <img :src="submitterSignature.url" alt="Chữ ký người đề nghị"
+                                        class="signature-image" />
+                                </template>
+                                <template v-else>
+                                    <div class="no-signature">Chưa ký</div>
+                                </template>
+                                <div class="signature-name">{{ submitterName }}</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Quy trình thường: giữ nguyên 4 ô như cũ -->
+            <table class="signatures-table" v-else>
                 <tbody>
                     <tr>
                         <!-- Ô 4: Bước 3 - Phê duyệt -->
@@ -143,7 +193,7 @@
                             </template>
                         </td>
 
-                        <!-- Ô 2: Bước 1 - Trưởng bộ phận -->
+                        <!-- Ô 2: Bước 1 - Quản đốc -->
                         <td class="center">
                             <strong>Quản đốc</strong>
                             <template v-if="canApproveStep1">
@@ -198,6 +248,7 @@
                     </tr>
                 </tbody>
             </table>
+
         </div>
     </a-modal>
 </template>
@@ -220,6 +271,12 @@ const props = defineProps({
     formInstance: { type: Object, required: true },
     meta: { type: Object, default: () => ({ formCode: '', revision: '', revisionDate: '' }) },
 })
+// Là phế liệu hay không (hỗ trợ cả snake_case và camelCase)
+const isScrap = computed(() => {
+    const d = data.value || {}
+    return Boolean(d.is_scrap_liquidation ?? d.isScrapLiquidation ?? false)
+})
+
 const emit = defineEmits(['close', 'updated'])
 const close = () => emit('close')
 

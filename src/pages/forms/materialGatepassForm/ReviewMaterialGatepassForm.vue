@@ -65,7 +65,24 @@
             </div>
 
             <!-- 4 Ô KÝ DUYỆT -->
-            <table class="signatures-table">
+            <table class="signatures-table" v-if="isScrap">
+                <tbody>
+                    <tr>
+                        <td class="center">
+                            <strong>Phê duyệt</strong>
+                            <div class="sign-note">(Ký, ghi tên)</div>
+                            <div class="signature">{{ approverName }}</div>
+                        </td>
+                        <td class="center">
+                            <strong>Người đề nghị</strong>
+                            <div class="sign-note">(Ký, ghi tên)</div>
+                            <div class="signature">{{ data.fullName }}</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="signatures-table" v-else>
                 <tbody>
                     <tr>
                         <td class="center">
@@ -116,7 +133,7 @@ const props = defineProps({
     approverId: { type: [String, Number], default: null },
     meta: { type: Object, default: () => ({ formCode: '', revision: '', revisionDate: '' }) }
 })
-
+const isScrap = computed(() => Boolean(props.data?.isScrapLiquidation))
 const emit = defineEmits(['update:visible', 'success'])
 const loading = ref(false)
 const close = () => emit('update:visible', false)
@@ -164,7 +181,8 @@ const handleSubmit = async () => {
             item_name: props.data.itemName,
             quantity: Number(props.data.quantity),
             reason: props.data.reason,
-            approver_id: props.data.approverId ?? props.approverId
+            approver_id: props.data.approverId ?? props.approverId,
+            is_scrap_liquidation: Boolean(props.data?.isScrapLiquidation)
         }
 
         await formInstanceService.createMaterialGatepass(payload)

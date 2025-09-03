@@ -39,7 +39,6 @@
                     </a-form-item>
                 </a-col>
             </a-row>
-
             <!-- NGƯỜI MANG RA CỔNG (TEXT) -->
             <a-row :gutter="16">
                 <a-col :span="24">
@@ -78,7 +77,15 @@
             <a-form-item label="Lý do" name="reason">
                 <a-textarea v-model:value="formState.reason" rows="3" placeholder="Nhập lý do mang vật tư ra cổng" />
             </a-form-item>
-
+            <!-- THANH LÝ PHẾ LIỆU -->
+            <a-row :gutter="16">
+                <a-col :span="24">
+                    <a-form-item label="Thanh lý phế liệu">
+                        <a-checkbox v-model:checked="formState.isScrapLiquidation">Chọn nếu là thanh lý phế
+                            liệu</a-checkbox>
+                    </a-form-item>
+                </a-col>
+            </a-row>
             <!-- PHÊ DUYỆT -->
             <a-divider orientation="left">Người duyệt</a-divider>
             <a-row :gutter="16">
@@ -133,7 +140,8 @@ const formState = ref({
     itemName: '',            // Tên hàng hóa, vật tư
     quantity: null,          // Số lượng
     reason: '',              // Lý do
-
+    // ===== Thanh lý phế liệu =====
+    isScrapLiquidation: false,  // <— thêm dòng này
     // ===== Phê duyệt =====
     approverId: undefined    // Người ký duyệt (id)
 })
@@ -164,22 +172,24 @@ const filterByLabel = (input, option) =>
     option?.label?.toLowerCase?.().includes(input.toLowerCase())
 
 const onReset = () => {
-    formState.value = {
-        msnv: '',
-        fullName: '',
-        department: '',
-        position: '',
+  formState.value = {
+    msnv: '',
+    fullName: '',
+    department: '',
+    position: '',
 
-        docDate: dayjs(),
-        carrierName: '',
-        vehiclePlate: '',
-        itemName: '',
-        quantity: null,
-        reason: '',
+    docDate: dayjs(),
+    carrierName: '',
+    vehiclePlate: '',
+    itemName: '',
+    quantity: null,
+    reason: '',
 
-        approverId: undefined
-    }
-    fillEmployeeInfo()
+    isScrapLiquidation: false, // <— thêm dòng này
+
+    approverId: undefined
+  }
+  fillEmployeeInfo()
 }
 
 const onSubmit = () => {
