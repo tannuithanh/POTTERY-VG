@@ -6,8 +6,9 @@
   <a-card bordered>
     <FormInstanceSearch :forms="formFilterOptions" @search="onSearch" @export="exportToExcel" />
 
+    <!-- 1) DÙNG pagination ref + @change -->
     <a-table :columns="columns" :data-source="filteredInstances" :loading="loading" row-key="id"
-      :pagination="{ pageSize: 10 }" :scroll="{ x: 900 }" class="fi-table" />
+      :pagination="pagination" :scroll="{ x: 1000 }" class="fi-table" @change="onTableChange" />
   </a-card>
 
   <!-- Modal chi tiết động -->
@@ -41,6 +42,14 @@ const loading = ref(false)
 const allInstances = ref([])
 const filteredInstances = ref([])
 
+/* Phân trang chủ động (quan trọng) */
+const pagination = ref({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+  showSizeChanger: true,
+})
+
 /* Force re-mount key cho modal chi tiết */
 const detailKey = ref(0)
 const bumpDetailKey = () => { detailKey.value += 1 }
@@ -63,10 +72,17 @@ const canDeleteFormInstance = computed(() => {
 })
 
 /* ===== Cột bảng ===== */
+/* 2) STT phải cộng offset theo trang */
 const columns = [
-  { title: 'Stt', key: 'index', customRender: ({ index }) => index + 1, width: 70 },
+  {
+    title: 'Stt',
+    key: 'index',
+    width: 70,
+    customRender: ({ index }) =>
+      (pagination.value.current - 1) * pagination.value.pageSize + index + 1,
+  },
   { title: 'Biểu mẫu', dataIndex: ['form', 'name'], key: 'formName', width: 240, ellipsis: true },
-  { title: 'Tiêu đề', dataIndex: 'title', key: 'title', ellipsis: true },
+  { title: 'Tiêu đề', dataIndex: 'title', key: 'title', width: 350 },
   { title: 'Người tạo', dataIndex: ['submitter_info', 'name'], key: 'creatorName', width: 200, ellipsis: true },
   {
     title: 'Trạng thái',
@@ -111,6 +127,10 @@ const fetchInstances = async () => {
         : res?.data?.items || []
     allInstances.value = data
     filteredInstances.value = data
+
+    /* 3) Cập nhật tổng sau khi nạp dữ liệu */
+    pagination.value.total = filteredInstances.value.length
+    pagination.value.current = 1
   } catch (err) {
     message.error(`Lỗi khi tải danh sách phiếu: ${err?.response?.data?.message || err.message || 'Không rõ lỗi'}`)
   } finally {
@@ -119,6 +139,7 @@ const fetchInstances = async () => {
 }
 
 /* ===== Search (client-side) ===== */
+/* 3) Reset về trang 1 và cập nhật total sau khi lọc */
 const onSearch = (filters) => {
   const keyword = (filters.keyword || '').toLowerCase()
   const [startDate, endDate] = filters.dateRange || []
@@ -139,6 +160,15 @@ const onSearch = (filters) => {
 
     return matchKeyword && matchDateRange && matchForm && matchStatus
   })
+
+  pagination.value.current = 1
+  pagination.value.total = filteredInstances.value.length
+}
+
+/* Bắt sự kiện đổi trang/đổi kích thước trang từ a-table */
+function onTableChange(pag /*, filters, sorter, extra */) {
+  pagination.value.current = pag.current
+  pagination.value.pageSize = pag.pageSize
 }
 
 /* ===== Export (GateEntry only) ===== */
@@ -198,7 +228,7 @@ async function handleDelete(record) {
     const res = await formInstanceService.deleteFormInstance(record.id)
     notification.success({ message: 'Thành công', description: res?.data?.message || 'Đã xoá phiếu' })
 
-    // 👉 luôn đóng & unmount modal chi tiết
+    // 👉 luôn đóng và bỏ mount modal chi tiết
     isPreviewVisible.value = false
     selectedRecord.value = null
     await nextTick()
@@ -219,7 +249,6 @@ async function handleDelete(record) {
     }
   }
 }
-
 
 function onDetailClosed() {
   isPreviewVisible.value = false

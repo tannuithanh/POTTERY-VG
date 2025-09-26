@@ -153,9 +153,9 @@ const columns = [
             { title: 'Giờ', key: 'time_hour', width: 250, align: 'center' },
         ]
     },
-    { title: 'Nội dung', dataIndex: 'title', key: 'title', width: 300 },
+    { title: 'Nội dung', dataIndex: 'title', key: 'title', width: 50000 },
     { title: 'Chủ trì', dataIndex: 'moderator', key: 'moderator', width: 200 },
-    { title: 'Người liên quan', key: 'related_people', width: 300 },
+    { title: 'Người liên quan', key: 'related_people', width: 50000 },
     { title: 'Thiết bị', dataIndex: 'devices', key: 'devices', width: 200 },
     { title: 'Thành phần chuyên môn', key: 'specialists', width: 300 },
     { title: 'Thành phần tư vấn', key: 'advisors', width: 200 },
@@ -165,7 +165,6 @@ const columns = [
     { title: 'Tệp đính kèm', key: 'attachment_path', width: 200 },
     { title: 'Nơi ghi nhận', dataIndex: 'result_record_location', key: 'result_record_location', width: 250 },
     { title: 'Người tạo', dataIndex: 'created_by', key: 'created_by', width: 200 },
-    { title: 'Tạo lúc', dataIndex: 'created_at', key: 'created_at', width: 200 },
     { title: 'Thao tác', key: 'actions', width: 100 },
 ];
 

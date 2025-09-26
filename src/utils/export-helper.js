@@ -53,11 +53,20 @@ export function exportFormInstanceToExcel(data) {
     return;
   }
 
-  const exportData = data.map((item, index) => {
+  // ❗ Chỉ lấy các phiếu đã duyệt
+  const filtered = data.filter((item) => item.status === "approved");
+
+  if (!filtered.length) {
+    message.info("Không có dữ liệu trạng thái ĐÃ DUYỆT để xuất.");
+    return;
+  }
+
+  const exportData = filtered.map((item, index) => {
     const submitter = item.submitter_info?.name || "Không rõ";
     const msnv = item.submitter_info?.msnv || "";
     const timeStart = item.data?.fromDate;
     const timeEnd = item.data?.toDate;
+    const departments = item.submitter_info?.department?.name || "";
 
     const startMinutes = parseTime(timeStart);
     const endMinutes = parseTime(timeEnd);
@@ -65,26 +74,22 @@ export function exportFormInstanceToExcel(data) {
     let lateText = "";
     let earlyText = "";
 
-    // Bảo vệ khi thiếu thời gian
     if (typeof startMinutes === "number" && typeof endMinutes === "number") {
       // Đi trễ sáng: 07:30 (450) → 09:00 (540)
       if (startMinutes >= 450 && startMinutes < 540) {
         const min = Math.min(endMinutes, 540) - Math.max(startMinutes, 450);
         if (min > 0) lateText = `✅ ${formatDuration(min)}`;
       }
-
       // Về sớm sáng: 09:01 (541) → 11:30 (690)
       if (startMinutes >= 541 && startMinutes < 690) {
         const min = Math.min(endMinutes, 690) - startMinutes;
         if (min > 0) earlyText = `✅ ${formatDuration(min)}`;
       }
-
       // Đi trễ chiều: 13:01 (781) → 15:00 (900)
       if (startMinutes >= 781 && startMinutes < 900) {
         const min = Math.min(endMinutes, 900) - startMinutes;
         if (min > 0) lateText = `✅ ${formatDuration(min)}`;
       }
-
       // Về sớm chiều: 15:01 (901) → 16:30 (990)
       if (startMinutes >= 901 && startMinutes < 990) {
         const min = Math.min(endMinutes, 990) - startMinutes;
@@ -92,22 +97,21 @@ export function exportFormInstanceToExcel(data) {
       }
     }
 
-    // NEW: lý do và ghi chú
     const purposeType = item.data?.purposeType; // 'personal' | 'company'
-    const lyDo = getPurposeLabel(purposeType); // cột "Lý do"
-    const ghiChu = item.data?.note ?? item.data?.reason ?? ""; // cột "Ghi chú" (ưu tiên note, fallback reason cũ)
+    const lyDo = getPurposeLabel(purposeType);
+    const ghiChu = item.data?.note ?? item.data?.reason ?? "";
 
     return {
       STT: index + 1,
       "Mã số nhân viên": msnv,
       "Tiêu đề phiếu": item.title || "",
       "Người đề nghị": submitter,
+      "Bộ phận": departments,
       "Ngày tạo": formatDateTime(item.created_at),
       "Thời gian bắt đầu": formatDateTime(timeStart),
       "Thời gian kết thúc": formatDateTime(timeEnd),
       "Trạng thái": getStatusLabel(item.status),
 
-      // NEW: hai cột yêu cầu
       "Lý do": lyDo,
       "Ghi chú": ghiChu,
 
@@ -121,9 +125,9 @@ export function exportFormInstanceToExcel(data) {
   const worksheet = XLSX.utils.json_to_sheet(exportData);
   const workbook = XLSX.utils.book_new();
 
-  // Tính độ rộng cột tự động
+  // Độ rộng cột tự động
   const colWidths = [];
-  const keys = Object.keys(exportData[0]);
+  const keys = Object.keys(exportData[0] || {});
   keys.forEach((key) => {
     let maxLength = key.length;
     exportData.forEach((row) => {

@@ -6,7 +6,7 @@
         <a-select v-model:value="roleId" :options="roleOptions" style="min-width: 260px" placeholder="Chọn vai trò"
           :loading="loadingRoles" />
       </a-form-item>
-      <a-button type="primary" :disabled="!roleId || !isDirty" :loading="saving" @click="save">
+      <a-button type="primary" :disabled="!roleId || !isDirty" :loading="saving" @click="save" style="color: white;">
         Lưu thay đổi
       </a-button>
     </a-form>

@@ -2,18 +2,22 @@ import axios from "axios";
 import { apiUrl } from "@/utils/env";
 import router from "@/router";
 import { notification } from "ant-design-vue";
+import { getAccessToken } from "@/utils/safeStorage";
 
-// Tạo instance
+// Các endpoint auth để tránh logout vòng lặp
+const AUTH_PATHS = ["/login", "/auth/login", "/me", "/refresh"];
+
 const api = axios.create({
-  baseURL: apiUrl,
+  baseURL: apiUrl, // ví dụ: 'http://portal.vinhgiapottery.com/api'
   timeout: 10000,
 });
 
-// 🧱 Interceptor REQUEST: gắn token nếu có
+// 🧱 REQUEST: gắn Bearer token nếu có
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
+    const token = getAccessToken();
     if (token) {
+      if (!config.headers) config.headers = {};
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -23,20 +27,37 @@ api.interceptors.request.use(
 
 let isLoggingOut = false;
 
+// 🧱 RESPONSE: xử lý lỗi mạng + 401
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
+    const response = error.response;
+    const cfg = error.config || {};
 
-    // ⛔ Bỏ qua nếu request này có cấu hình `skipAuthInterceptor`
-    if (originalRequest?.skipAuthInterceptor) {
+    // Nếu lỗi mạng (timeout, server không phản hồi)
+    if (!response) {
+      notification.error({
+        message: "Mạng hoặc máy chủ không phản hồi",
+        description: "Vui lòng kiểm tra kết nối hoặc thử lại sau.",
+      });
       return Promise.reject(error);
     }
 
-    if (error.response && error.response.status === 401) {
-      if (!isLoggingOut) {
-        isLoggingOut = true;
+    // Bỏ qua nếu request này có skipAuthInterceptor
+    if (cfg.skipAuthInterceptor) {
+      return Promise.reject(error);
+    }
 
+    // Bỏ qua 401 cho chính các call auth
+    const url = (cfg.url || "").toString();
+    if (AUTH_PATHS.some((p) => url.includes(p))) {
+      return Promise.reject(error);
+    }
+
+    if (response.status === 401 && !isLoggingOut) {
+      isLoggingOut = true;
+
+      try {
         const { useAuthStore } = await import("@/stores/auth");
         const auth = useAuthStore();
 
@@ -47,6 +68,10 @@ api.interceptors.response.use(
           description: "Vui lòng đăng nhập lại để tiếp tục.",
         });
 
+        if (router.currentRoute.value.name !== "login") {
+          router.push({ name: "login" });
+        }
+      } finally {
         setTimeout(() => {
           isLoggingOut = false;
         }, 3000);

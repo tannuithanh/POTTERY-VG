@@ -67,10 +67,12 @@ import { HomeOutlined, IdcardOutlined, ProfileOutlined, CalendarOutlined, BookOu
 import { useRoute } from 'vue-router'
 import { computed, ref, h } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+
 const collapsed = ref(false)
 const route = useRoute()
 
 const user = useAuthStore();
+console.log(user)
 const activeKey = computed(() => {
   const path = route.path;
 

@@ -391,6 +391,7 @@ const actions = {
 
 
 <style scoped>
+
 .signature-image {
     height: 100px;
     object-fit: contain;

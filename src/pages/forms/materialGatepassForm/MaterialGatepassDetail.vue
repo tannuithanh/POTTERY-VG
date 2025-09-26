@@ -235,16 +235,18 @@
                         <td class="center">
                             <strong>Người đề nghị</strong>
                             <div class="signature">
-                                <template v-if="submitterSignature.url">
+                                <template v-if="submitterSignature?.url">
                                     <img :src="submitterSignature.url" alt="Chữ ký người đề nghị"
                                         class="signature-image" />
                                 </template>
                                 <template v-else>
-                                    <div class="no-signature">Chưa ký</div>
+                                    <img src="../../../assets/images/accept.png" alt="Chưa ký"
+                                        class="signature-image" />
                                 </template>
                                 <div class="signature-name">{{ submitterName }}</div>
                             </div>
                         </td>
+
                     </tr>
                 </tbody>
             </table>
@@ -454,6 +456,40 @@ const actions = {
 </script>
 
 <style scoped>
+/* Giữ modal hiển thị sắc nét, bỏ transform gây blur */
+.force-fixed-width-modal .ant-modal-wrap,
+.force-fixed-width-modal .ant-modal {
+  transform: none !important;
+}
+
+/* Bỏ padding mặc định nếu cần sát mép giấy */
+.no-padding-modal .ant-modal-body { padding: 0 !important; }
+
+/* Bảng in ổn định, không co giãn lạ */
+.form-header, .signatures-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* 4 ô chữ ký chia đều, không vỡ hàng */
+.signatures-table td { width: 25%; }
+
+/* Dòng chấm không bị tụt, không wrap lung tung */
+.dot-row .dots {
+  flex: 1 1 0;
+  min-width: 0;           /* cho phép co mà không tràn */
+  white-space: nowrap;    /* muốn xuống dòng thì đổi thành pre-wrap */
+  overflow: hidden;
+}
+
+/* Ảnh chữ ký không nhòe/vỡ */
+.signature-image {
+  max-width: 100%;
+  height: 100px;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+}
+
 .signature-image {
     height: 100px;
     object-fit: contain;
