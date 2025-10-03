@@ -33,7 +33,7 @@
             <a-row :gutter="16">
                 <a-col :span="12">
                     <a-form-item label="Xe ô tô" required>
-                        <a-input v-model:value="formState.carText"/>
+                        <a-input v-model:value="formState.carText" />
                     </a-form-item>
                 </a-col>
                 <a-col :span="12">
@@ -61,7 +61,7 @@
             <a-row :gutter="16">
                 <a-col :span="12">
                     <a-form-item label="Lộ trình - Từ" required>
-                        <a-input v-model:value="formState.routeFrom"  />
+                        <a-input v-model:value="formState.routeFrom" />
                     </a-form-item>
                 </a-col>
                 <a-col :span="12">
@@ -161,8 +161,14 @@ const handlePreview = () => {
 
 const createFormInstance = async (payload) => {
     try {
-        // dùng API thực tế của bạn
-        await (formInstanceService.createCarDispatch?.(payload) || formInstanceService.createGatePass(payload))
+        const finalPayload = {
+            ...payload,
+            department_id: userAuth.user?.department?.id ?? null, // ✅ thêm id phòng ban
+        }
+
+        await (formInstanceService.createCarDispatch?.(finalPayload)
+            || formInstanceService.createGatePass(finalPayload))
+
         notification.success({ message: 'Tạo phiếu thành công', description: 'Phiếu điều động xe đã được gửi duyệt.' })
         resetForm()
         showPreview.value = false
@@ -173,6 +179,7 @@ const createFormInstance = async (payload) => {
         })
     }
 }
+
 
 const resetForm = () => {
     formState.value = {

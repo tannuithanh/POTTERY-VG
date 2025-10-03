@@ -63,7 +63,59 @@
             </div>
 
             <!-- 4 Ô KÝ DUYỆT (thứ tự như yêu cầu) -->
-            <table class="signatures-table">
+            <!-- CHỮ KÝ -->
+            <!-- HCNS (department_id=23) -> chỉ 2 ô: Phê duyệt & Người đề nghị -->
+            <table v-if="isHCNS" class="signatures-table two-cols">
+                <tbody>
+                    <tr>
+                        <!-- Phê duyệt (bước cuối) -->
+                        <td class="center">
+                            <strong>Phê duyệt</strong>
+                            <template v-if="canApproveStep3">
+                                <div class="signature" style="gap:10px; text-align:left; width:100%;">
+                                    <!-- Chế độ 2 ô: không còn bước tiếp theo => không cần chọn next approver -->
+                                    <div style="display:flex; gap:8px; justify-content:center; margin-top:10px;">
+                                        <a-button type="primary" :loading="approving" @click="actions.approveStep3">Đồng
+                                            ý</a-button>
+                                        <a-button danger :loading="rejecting" @click="actions.rejectStep3">Từ
+                                            chối</a-button>
+                                    </div>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <div class="signature">
+                                    <template v-if="stampFor(step3View).img">
+                                        <img :src="stampFor(step3View).img" :alt="stampFor(step3View).alt"
+                                            class="signature-image" />
+                                    </template>
+                                    <template v-else>
+                                        <div class="no-signature">{{ stateText(step3View.state) }}</div>
+                                    </template>
+                                    <div class="signature-name">{{ step3View.name || '—' }}</div>
+                                </div>
+                            </template>
+                        </td>
+
+                        <!-- Người đề nghị -->
+                        <td class="center">
+                            <strong>NGƯỜI ĐỀ NGHỊ</strong>
+                            <div class="signature">
+                                <template v-if="submitterSignature.url">
+                                    <img :src="submitterSignature.url" alt="Chữ ký người đề nghị"
+                                        class="signature-image" />
+                                </template>
+                                <template v-else>
+                                    <div class="no-signature">Chưa ký</div>
+                                </template>
+                                <div class="signature-name">{{ submitterName }}</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Các phòng ban khác -> giữ nguyên 4 ô như hiện tại -->
+            <table v-else class="signatures-table">
                 <tbody>
                     <tr>
                         <!-- Ô 4: BƯỚC 3 - Phê duyệt cuối -->
@@ -81,7 +133,6 @@
                                             Vui lòng chọn người duyệt kế tiếp.
                                         </div>
                                     </template>
-
                                     <div style="display:flex; gap:8px; justify-content:center; margin-top:10px;">
                                         <a-button type="primary" :loading="approving" @click="actions.approveStep3">Đồng
                                             ý</a-button>
@@ -119,7 +170,6 @@
                                             Vui lòng chọn người duyệt kế tiếp.
                                         </div>
                                     </template>
-
                                     <div style="display:flex; gap:8px; justify-content:center; margin-top:10px;">
                                         <a-button type="primary" :loading="approving" @click="actions.approveStep2">Đồng
                                             ý</a-button>
@@ -157,7 +207,6 @@
                                             Vui lòng chọn người duyệt kế tiếp.
                                         </div>
                                     </template>
-
                                     <div style="display:flex; gap:8px; justify-content:center; margin-top:10px;">
                                         <a-button type="primary" :loading="approving" @click="actions.approveStep1">Đồng
                                             ý</a-button>
@@ -180,7 +229,7 @@
                             </template>
                         </td>
 
-                        <!-- Ô 1: NGƯỜI ĐỀ NGHỊ -->
+                        <!-- Ô 1: Người đề nghị -->
                         <td class="center">
                             <strong>NGƯỜI ĐỀ NGHỊ</strong>
                             <div class="signature">
@@ -197,6 +246,7 @@
                     </tr>
                 </tbody>
             </table>
+
 
             <div class="note">Chú ý: Phiếu này được chuyển đến BP. HCNS trước 24h</div>
         </div>
@@ -222,6 +272,20 @@ const props = defineProps({
     formInstance: { type: Object, required: true },
     meta: { type: Object, default: () => ({ formCode: '', revision: '', revisionDate: '' }) }
 })
+const departmentId = computed(() =>
+    props.formInstance?.data?.department_id ??
+    props.formInstance?.submitter_info?.department?.id ??
+    null
+)
+
+// 👉 HCNS = 23 -> dùng chế độ 2 ô
+const isHCNS = computed(() => String(departmentId.value) === '23')
+
+// 👉 Tổng bước duyệt *hữu hiệu* cho logic chọn next approver
+// HCNS: chỉ còn bước cuối cùng => 1 bước hiệu dụng
+const totalEffectiveSteps = computed(() => isHCNS.value ? 1 : (props.formInstance?.form?.steps_count || 0))
+
+
 const emit = defineEmits(['close', 'updated'])
 const close = () => emit('close')
 
@@ -293,10 +357,8 @@ const canApproveStep2 = computed(() => canApproveFor(step2View.value))
 const canApproveStep3 = computed(() => canApproveFor(step3View.value))
 const stateText = (st) => st === 'approved' ? 'Đã ký' : (st === 'rejected' ? 'Đã từ chối' : 'Chưa ký')
 
-/* BẮT BUỘC CHỌN NGƯỜI DUYỆT KẾ TIẾP KHI CHƯA PHẢI BƯỚC CUỐI */
 const needNextApprover = computed(() => {
-    const total = props.formInstance?.form?.steps_count || 0
-    return (currentStepNo.value || 0) < total
+    return (currentStepNo.value || 0) < totalEffectiveSteps.value
 })
 
 /* DANH SÁCH NGƯỜI DUYỆT KẾ TIẾP (lọc theo tên) */
@@ -391,7 +453,9 @@ const actions = {
 
 
 <style scoped>
-
+.signatures-table.two-cols td {
+  width: 50%;
+}
 .signature-image {
     height: 100px;
     object-fit: contain;

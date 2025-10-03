@@ -456,20 +456,6 @@ const actions = {
 </script>
 
 <style scoped>
-/* Giữ modal hiển thị sắc nét, bỏ transform gây blur */
-.force-fixed-width-modal .ant-modal-wrap,
-.force-fixed-width-modal .ant-modal {
-  transform: none !important;
-}
-
-/* Bỏ padding mặc định nếu cần sát mép giấy */
-.no-padding-modal .ant-modal-body { padding: 0 !important; }
-
-/* Bảng in ổn định, không co giãn lạ */
-.form-header, .signatures-table {
-  table-layout: fixed;
-  width: 100%;
-}
 
 /* 4 ô chữ ký chia đều, không vỡ hàng */
 .signatures-table td { width: 25%; }

@@ -63,13 +63,31 @@ const formFilterOptions = [
 ]
 
 /* ===== Quyền xoá ===== */
+/* ===== Quyền xoá theo record ===== */
 const authStore = useAuthStore()
-const canDeleteFormInstance = computed(() => {
+
+/** Trả về true nếu user có thể xoá record */
+function canDelete(record) {
   const user = authStore.user
-  if (user?.is_admin) return true
-  const formModule = user?.modules?.find(m => m.code === 'form')
-  return formModule?.actions?.includes('delete')
-})
+  if (!user) return false
+
+  // Admin luôn có quyền xoá
+  if (user.is_admin) return true
+
+  // Lấy id người tạo từ nhiều khả năng
+  const creatorId =
+    record?.submitter_id ??
+    record?.created_by ??
+    record?.submitter_info?.id ??
+    null
+
+  const isCreator = creatorId != null && String(creatorId) === String(user.id)
+  const isPending = record?.status === 'pending'
+
+  // Chỉ cho xoá khi là người tạo và trạng thái pending
+  return isCreator && isPending
+}
+
 
 /* ===== Cột bảng ===== */
 /* 2) STT phải cộng offset theo trang */
@@ -111,10 +129,11 @@ const columns = [
     customRender: ({ record }) => h(TableActionButtons, {
       onView: () => handleView(record),
       showEdit: false,
-      showDelete: canDeleteFormInstance.value,
+      showDelete: canDelete(record),
       onDelete: () => handleDelete(record)
     })
   }
+
 ]
 
 /* ===== Fetch list ===== */
@@ -212,6 +231,13 @@ function handleView(record) {
 }
 
 async function handleDelete(record) {
+  if (!canDelete(record)) {
+    return notification.warning({
+      message: 'Không thể xoá',
+      description: 'Bạn chỉ có thể xoá phiếu ở trạng thái "Đang chờ" do chính bạn tạo, trừ khi bạn là admin.'
+    })
+  }
+
   try {
     await new Promise((resolve, reject) => {
       Modal.confirm({
@@ -228,15 +254,11 @@ async function handleDelete(record) {
     const res = await formInstanceService.deleteFormInstance(record.id)
     notification.success({ message: 'Thành công', description: res?.data?.message || 'Đã xoá phiếu' })
 
-    // 👉 luôn đóng và bỏ mount modal chi tiết
     isPreviewVisible.value = false
     selectedRecord.value = null
     await nextTick()
     bumpDetailKey()
-
-    // 👉 quét sạch mọi modal treo (kể cả confirm)
     Modal.destroyAll()
-
     await fetchInstances()
   } catch (err) {
     if (err?.message === 'Huỷ xoá') {
@@ -249,6 +271,7 @@ async function handleDelete(record) {
     }
   }
 }
+
 
 function onDetailClosed() {
   isPreviewVisible.value = false

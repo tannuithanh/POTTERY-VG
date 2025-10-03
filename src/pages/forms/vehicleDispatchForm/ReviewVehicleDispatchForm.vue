@@ -65,10 +65,27 @@
             </div>
 
             <!-- 4 Ô KÝ DUYỆT -->
-            <table class="signatures-table">
+            <table v-if="isHCNS" class="signatures-table two-cols">
                 <tbody>
                     <tr>
-                        <!-- Trái nhất -->
+                        <td class="center">
+                            <strong>Phê duyệt</strong>
+                            <div class="sign-note">(Ký, họ tên)</div>
+                            <div class="signature">{{ managerName }}</div>
+                        </td>
+                        <td class="center">
+                            <strong>Người đề nghị</strong>
+                            <div class="sign-note">(Ký, họ tên)</div>
+                            <div class="signature">{{ data.fullName }}</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Các phòng ban khác -> giữ nguyên 4 ô -->
+            <table v-else class="signatures-table">
+                <tbody>
+                    <tr>
                         <td class="center">
                             <strong>Phê duyệt</strong>
                             <div class="sign-note">(Ký, họ tên)</div>
@@ -87,7 +104,6 @@
                             <div class="signature">{{ managerName }}</div>
                         </td>
 
-                        <!-- Phải nhất -->
                         <td class="center">
                             <strong>Người đề nghị</strong>
                             <div class="sign-note">(Ký, họ tên)</div>
@@ -122,7 +138,12 @@ const props = defineProps({
     managerId: { type: [String, Number], default: null },
     meta: { type: Object, default: () => ({ formCode: '', revision: '', revisionDate: '' }) }
 })
+const departmentId = computed(() =>
+  props.data?.departmentId ?? userAuth.user?.department?.id ?? null
+)
 
+// ✅ HCNS = 23 -> chỉ 2 ô ký
+const isHCNS = computed(() => String(departmentId.value) === '23')
 const emit = defineEmits(['update:visible', 'submit', 'success']) // 'success' optional
 
 const loading = ref(false)
@@ -134,10 +155,10 @@ const handleSubmit = async () => {
     try {
         loading.value = true
 
-        // map props.data -> payload API (CHỈ các field đã chốt + manager_id)
         const payload = {
-            created_at: dayjs().format('YYYY-MM-DD'), // date hôm nay
+            created_at: dayjs().format('YYYY-MM-DD'),
             requester_id: userAuth.user?.id || null,
+            department_id: departmentId.value,                    // ✅ gửi department_id
             vehicle: props.data?.carText || '',
             driver: props.data?.driverText || '',
             start_time: props.data?.fromDate ? dayjs(props.data.fromDate).format('YYYY-MM-DD HH:mm:ss') : '',
@@ -145,9 +166,8 @@ const handleSubmit = async () => {
             route_from: props.data?.routeFrom || '',
             route_to: props.data?.routeTo || '',
             reason: props.data?.reason || '',
-            manager_id: props.data?.approverId ?? props.managerId // người duyệt bước 1
+            manager_id: props.data?.approverId ?? props.managerId // người phê duyệt duy nhất
         }
-        console.log(payload)
         // validate nhanh phía client (cực gọn, đúng những gì backend yêu cầu)
         if (!payload.requester_id) throw new Error('Thiếu requester_id')
         if (!payload.vehicle) throw new Error('Thiếu xe ô tô')
@@ -198,6 +218,8 @@ const managerName = computed(() =>
 
 
 <style scoped>
+
+
 .print-area {
     font-family: Tahoma, Arial, sans-serif;
     background: #fff;
@@ -312,5 +334,11 @@ const managerName = computed(() =>
     display: flex;
     justify-content: center;
     gap: 12px
+}
+
+
+/* HCNS: 2 cột */
+.signatures-table.two-cols td {
+  width: 50%;
 }
 </style>
