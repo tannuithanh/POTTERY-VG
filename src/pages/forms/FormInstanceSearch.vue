@@ -35,16 +35,27 @@
             </a-col>
 
             <!-- Export -->
-            <a-col v-if="canExport" :xs="24" :sm="12" :md="12" :lg="2">
+            <a-col :xs="24" :sm="12" :md="12" :lg="2">
                 <a-form-item label="&nbsp;" class="mb-0">
-                    <a-button type="primary" block @click="onExport">
+                    <!-- Nút chính: xuất theo bộ lọc hiện tại (filters.formCode) -->
+                    <a-dropdown-button type="primary" block @click="onExport()">
                         <template #icon>
                             <FileExcelOutlined />
                         </template>
                         Xuất Excel
-                    </a-button>
+                        <template #overlay>
+                            <a-menu @click="onExportMenuClick">
+                                <a-menu-item key="GateEntry">Giấy ra vào cổng</a-menu-item>
+                                <a-menu-item key="VehicleDispatch">Phiếu điều động xe</a-menu-item>
+                                <a-menu-item key="MaterialGatepass">Phiếu mang vật tư ra cổng</a-menu-item>
+                                <a-menu-divider />
+                                <a-menu-item key="__ALL__">Tất cả </a-menu-item>
+                            </a-menu>
+                        </template>
+                    </a-dropdown-button>
                 </a-form-item>
             </a-col>
+
         </a-row>
     </a-form>
 </template>
@@ -69,14 +80,6 @@ const props = defineProps({
 
 const emit = defineEmits(['search', 'export'])
 
-const authStore = useAuthStore()
-const canExport = computed(() => {
-    const user = authStore.user
-    const isAdmin = user?.is_admin == 1
-    const formModule = user?.modules?.find(m => m.code === 'form')
-    const hasPermission = formModule?.actions?.includes('export_excel')
-    return isAdmin || hasPermission
-})
 
 const filters = ref({
     keyword: '',
@@ -96,8 +99,19 @@ function emitSearch() {
     emit('search', { ...filters.value })
 }
 
-function onExport() {
-    emit('export', { ...filters.value })
+function onExport(codeOverride) {
+    // Nếu truyền codeOverride => dùng nó; nếu không => dùng filters.formCode
+    const formCode = codeOverride ?? filters.value.formCode ?? ''
+    emit('export', { ...filters.value, formCode })
+}
+
+function onExportMenuClick({ key }) {
+    if (key === '__ALL__') {
+        // Không chọn loại -> xuất tách 3 file
+        return emit('export', { ...filters.value, formCode: '' })
+    }
+    // Chọn loại cụ thể từ menu
+    onExport(key)
 }
 </script>
 

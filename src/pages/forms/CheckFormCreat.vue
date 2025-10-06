@@ -191,25 +191,21 @@ function onTableChange(pag /*, filters, sorter, extra */) {
 }
 
 /* ===== Export (GateEntry only) ===== */
-import { exportFormInstanceToExcel } from '@/utils/export-helper'
+import { exportByFormCode, exportAllSeparated } from '@/utils/export-helper'
 const exportToExcel = (filters) => {
   const list = filteredInstances.value
+
   if (!list.length) return message.info('Không có dữ liệu để xuất')
 
   const code = filters?.formCode
+
+  // Không chọn loại => xuất tách 3 file (nếu có dữ liệu)
   if (!code || code === '') {
-    const gate = list.filter(x => x.form?.code === 'GateEntry')
-    if (!gate.length) return message.info('Không có dữ liệu Giấy ra vào cổng để xuất')
-    return exportFormInstanceToExcel(gate)
+    return exportAllSeparated(list)
   }
 
-  if (code === 'GateEntry') {
-    const gate = list.filter(x => x.form?.code === 'GateEntry')
-    if (!gate.length) return message.info('Không có dữ liệu Giấy ra vào cổng để xuất')
-    return exportFormInstanceToExcel(gate)
-  }
-
-  message.info('Chức năng xuất Excel hiện chỉ hỗ trợ Giấy ra vào cổng.')
+  // Chọn loại cụ thể => xuất đúng 1 file theo loại đó
+  return exportByFormCode(list, code)
 }
 
 /* ===== Detail component mapping ===== */

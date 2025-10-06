@@ -15,33 +15,33 @@
         <a-sub-menu v-if="user.user?.is_admin || user.modules.some(m => m.code === 'form')" key="profile"
           :icon="h(IdcardOutlined)" title="Hồ sơ điện tử">
           <a-menu-item key="forms_create">
-            <router-link to="/forms_create">Tạo hồ sơ điện tử</router-link>
+            <router-link to="/forms_create">- Tạo hồ sơ điện tử</router-link>
           </a-menu-item>
           <a-menu-item key="profile-list">
-            <router-link to="/check_form_create">Danh sách hồ sơ</router-link>
+            <router-link to="/check_form_create">- Danh sách hồ sơ</router-link>
           </a-menu-item>
         </a-sub-menu>
 
         <a-sub-menu key="news" :icon="h(ProfileOutlined)" title="Bảng tin">
           <a-menu-item v-if="user.user?.is_admin || user.modules.some(m => m.code === 'news')" key="create_news">
-            <router-link to="/create_news">Tạo bảng tin</router-link>
+            <router-link to="/create_news">- Tạo bảng tin</router-link>
           </a-menu-item>
           <a-menu-item key="news_list">
-            <router-link to="/news_list">Thông tin bảng tin</router-link>
+            <router-link to="/news_list">- Thông tin bảng tin</router-link>
           </a-menu-item>
           <a-menu-item v-if="user.user?.is_admin || user.modules.some(m => m.code === 'news')" key="News-list_manager">
-            <router-link to="/news_list_manager">Danh sách hồ sơ</router-link>
+            <router-link to="/news_list_manager">- Danh sách hồ sơ</router-link>
           </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="meetings" :icon="h(CalendarOutlined)" title="Lịch họp">
           <a-menu-item key="meeting-manager">
-            <router-link to="/meeting-manager">Quản lý lịch họp</router-link>
+            <router-link to="/meeting-manager">- Quản lý lịch họp</router-link>
           </a-menu-item>
           <a-menu-item key="create_meeting">
-            <router-link to="/create-meeting">Đăng ký lịch họp</router-link>
+            <router-link to="/create-meeting">- Đăng ký lịch họp</router-link>
           </a-menu-item>
           <a-menu-item key="meeting-calendar">
-            <router-link to="/meeting-calendar">Lịch tháng</router-link>
+            <router-link to="/meeting-calendar">- Lịch tháng</router-link>
           </a-menu-item>
         </a-sub-menu>
         <!-- <a-sub-menu key="cost-journal" :icon="h(BookOutlined)" title="Bút toán chi phí">
