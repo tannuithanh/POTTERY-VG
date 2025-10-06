@@ -2,7 +2,6 @@
     <a-modal :visible="visible" :destroyOnClose="true" :getContainer="false" :footer="null" :width="900"
         wrap-class-name="force-fixed-width-modal no-padding-modal" :mask-closable="true" :keyboard="true"
         :closable="false" @cancel="close">
-
         <div class="print-area">
             <!-- HEADER -->
             <table class="form-header">
@@ -64,7 +63,9 @@
                 <span class="dots">{{ data.reason }}</span>
             </div>
 
-            <!-- 4 Ô KÝ DUYỆT -->
+            <!-- ========== CHỮ KÝ ========== -->
+
+            <!-- scrap => 2 ô -->
             <table class="signatures-table" v-if="isScrap">
                 <tbody>
                     <tr>
@@ -82,6 +83,31 @@
                 </tbody>
             </table>
 
+            <!-- goods => 3 ô -->
+            <table class="signatures-table cols-3" v-else-if="isGoods">
+                <tbody>
+                    <tr>
+                        <td class="center">
+                            <strong>Phê duyệt</strong>
+                            <div class="sign-note">(Ký, ghi tên)</div>
+                            <div class="signature">&nbsp;</div>
+                        </td>
+                        
+                        <td class="center">
+                            <strong>Trưởng bộ phận</strong>
+                            <div class="sign-note">(Ký, ghi tên)</div>
+                            <div class="signature">{{ approverName }}</div>
+                        </td>
+                        <td class="center">
+                            <strong>Người đề nghị</strong>
+                            <div class="sign-note">(Ký, ghi tên)</div>
+                            <div class="signature">{{ data.fullName }}</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- còn lại (mọi loại khác) => 4 ô -->
             <table class="signatures-table" v-else>
                 <tbody>
                     <tr>
@@ -96,7 +122,7 @@
                             <div class="signature">&nbsp;</div>
                         </td>
                         <td class="center">
-                            <strong>Quản đốc</strong>
+                            <strong>Quản đốc/TBP</strong>
                             <div class="sign-note">(Ký, ghi tên)</div>
                             <div class="signature">{{ approverName }}</div>
                         </td>
@@ -128,34 +154,51 @@ const userAuth = useAuthStore()
 
 const props = defineProps({
     visible: { type: Boolean, default: false },
-    data: { type: Object, default: () => ({}) },  // chứa carrierName, docDate, ...
-    users: { type: Array, default: () => [] },    // dùng lookup tên người duyệt
+    data: { type: Object, default: () => ({}) },
+    users: { type: Array, default: () => [] },
     approverId: { type: [String, Number], default: null },
     meta: { type: Object, default: () => ({ formCode: '', revision: '', revisionDate: '' }) }
 })
-const isScrap = computed(() => Boolean(props.data?.isScrapLiquidation))
+
 const emit = defineEmits(['update:visible', 'success'])
 const loading = ref(false)
 const close = () => emit('update:visible', false)
 
-/* ======= Hiển thị ======= */
+/* ===== Chuẩn hoá loại phiếu: scrap | goods | other (mặc định) ===== */
+const normalize = (s) => (s ?? '').toString().trim().toLowerCase()
+const trueish = (v) => v === true || v === 1 || v === '1' || (typeof v === 'string' && v.toLowerCase() === 'true')
+
+const typeResolved = computed(() => {
+    const d = props.data || {}
+    const raw = normalize(d.gatepassType ?? d.gatepass_type)
+    if (raw === 'scrap') return 'scrap'
+    if (raw === 'goods') return 'goods'
+    // fallback di sản: nếu có cờ phế liệu cũ thì coi là scrap, ngược lại gom về "other" => 4 ô
+    const flag = d.isScrapLiquidation ?? d.is_scrap_liquidation
+    return trueish(flag) ? 'scrap' : 'other'
+})
+
+const isScrap = computed(() => typeResolved.value === 'scrap')
+const isGoods = computed(() => typeResolved.value === 'goods')
+// còn lại auto rơi vào nhánh v-else => 4 ô
+
+/* ===== Hiển thị ===== */
 const today = computed(() => {
     const now = new Date()
-    return { d: String(now.getDate()).padStart(2, '0'), m: String(now.getMonth() + 1).padStart(2, '0'), y: now.getFullYear() }
+    return {
+        d: String(now.getDate()).padStart(2, '0'),
+        m: String(now.getMonth() + 1).padStart(2, '0'),
+        y: now.getFullYear()
+    }
 })
-const todayStr = computed(() => dayjs().format('DD/MM/YYYY')).value
-const findNameById = (id) => props.users?.find(u => String(u.id) === String(id))?.name || ''
-
-// 👉 carrier là text người nhập tay
 const carrierName = computed(() => (props.data?.carrierName || '').trim())
-
-// 👉 Ngày hiển thị lấy từ docDate
-const docDateOnly = computed(() => props.data?.docDate ? dayjs(props.data.docDate).format('DD/MM/YYYY') : '')
-
-// Người ký duyệt lookup theo id
+const docDateOnly = computed(() =>
+    props.data?.docDate ? dayjs(props.data.docDate).format('DD/MM/YYYY') : ''
+)
+const findNameById = (id) => props.users?.find(u => String(u.id) === String(id))?.name || ''
 const approverName = computed(() => findNameById(props.data?.approverId ?? props.approverId))
 
-/* ======= Submit API (notification) ======= */
+/* ===== Submit API ===== */
 const handleSubmit = async () => {
     try {
         loading.value = true
@@ -163,7 +206,6 @@ const handleSubmit = async () => {
         const requesterId = userAuth.user?.id || null
         if (!requesterId) throw new Error('Thiếu thông tin người đề nghị')
 
-        // Validate tối thiểu
         if (!props.data?.docDate) throw new Error('Thiếu Ngày phiếu')
         if (!carrierName.value) throw new Error('Thiếu Người mang ra cổng')
         if (!props.data?.vehiclePlate) throw new Error('Thiếu Biển số xe')
@@ -172,7 +214,6 @@ const handleSubmit = async () => {
         if (!props.data?.reason) throw new Error('Thiếu Lý do')
         if (!(props.data?.approverId ?? props.approverId)) throw new Error('Thiếu Người ký duyệt')
 
-        // Payload chuẩn cho backend (đã đổi carrier_name)
         const payload = {
             doc_date: dayjs(props.data.docDate).format('YYYY-MM-DD'),
             requester_id: requesterId,
@@ -182,7 +223,8 @@ const handleSubmit = async () => {
             quantity: Number(props.data.quantity),
             reason: props.data.reason,
             approver_id: props.data.approverId ?? props.approverId,
-            is_scrap_liquidation: Boolean(props.data?.isScrapLiquidation)
+            is_scrap_liquidation: typeResolved.value === 'scrap',
+            gatepass_type: typeResolved.value   // => 'scrap' | 'goods' | 'other'
         }
 
         await formInstanceService.createMaterialGatepass(payload)
@@ -208,6 +250,9 @@ const handleSubmit = async () => {
     }
 }
 </script>
+
+
+
 
 <style scoped>
 .print-area {

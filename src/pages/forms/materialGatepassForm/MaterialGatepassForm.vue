@@ -39,7 +39,21 @@
                     </a-form-item>
                 </a-col>
             </a-row>
-            <!-- NGƯỜI MANG RA CỔNG (TEXT) -->
+
+            <!-- LOẠI PHIẾU -->
+            <a-row :gutter="16">
+                <a-col :span="24">
+                    <a-form-item label="Loại phiếu" name="gatepassType">
+                        <a-radio-group v-model:value="formState.gatepassType" button-style="solid">
+                            <a-radio-button value="goods">Hàng hóa, vật tư</a-radio-button>
+                            <a-radio-button value="scrap">Thanh lý phế liệu</a-radio-button>
+                            <a-radio-button value="pottery">Chậu/tượng</a-radio-button>
+                        </a-radio-group>
+                    </a-form-item>
+                </a-col>
+            </a-row>
+
+            <!-- NGƯỜI MANG RA CỔNG -->
             <a-row :gutter="16">
                 <a-col :span="24">
                     <a-form-item label="Người mang ra cổng" name="carrierName">
@@ -77,27 +91,21 @@
             <a-form-item label="Lý do" name="reason">
                 <a-textarea v-model:value="formState.reason" rows="3" placeholder="Nhập lý do mang vật tư ra cổng" />
             </a-form-item>
-            <!-- THANH LÝ PHẾ LIỆU -->
-            <a-row :gutter="16">
-                <a-col :span="24">
-                    <a-form-item label="Thanh lý phế liệu">
-                        <a-checkbox v-model:checked="formState.isScrapLiquidation">Chọn nếu là thanh lý phế
-                            liệu</a-checkbox>
-                    </a-form-item>
-                </a-col>
-            </a-row>
-            <!-- PHÊ DUYỆT -->
+
+            <!-- NGƯỜI DUYỆT -->
             <a-divider orientation="left">Người duyệt</a-divider>
             <a-row :gutter="16">
                 <a-col :span="24">
-                    <a-form-item label="Chọn người ký duyệt" name="approverId" required>
+                    <a-form-item
+                        :label="formState.gatepassType === 'goods' ? 'Chọn Trưởng bộ phận' : 'Chọn người ký duyệt'"
+                        name="approverId" required>
                         <a-select v-model:value="formState.approverId" show-search placeholder="Tìm và chọn người duyệt"
                             :options="userOptions" :filter-option="filterByLabel" />
                     </a-form-item>
                 </a-col>
             </a-row>
 
-            <!-- NÚT -->
+            <!-- ACTIONS -->
             <div style="text-align:center">
                 <a-button type="primary" :loading="submitting" @click="onSubmit">Tạo phiếu</a-button>
             </div>
@@ -106,11 +114,11 @@
 
     <!-- PREVIEW -->
     <ReviewMaterialGatepassForm :visible="showPreview" :data="formState" :users="approverUsers"
-        :approverId="formState.approverId" @update:visible="val => showPreview = val" @success="onReset()" />
+        :approverId="formState.approverId" @update:visible="val => (showPreview = val)" @success="onReset()" />
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/stores/auth'
 import userService from '@/services/userService'
@@ -122,32 +130,36 @@ const submitting = ref(false)
 
 const userAuth = useAuthStore()
 
-// Danh sách user chỉ để chọn người duyệt + hiển thị tên người duyệt trong preview
+// chọn người duyệt
 const userOptions = ref([])   // { value, label }
 const approverUsers = ref([]) // { id, name } cho modal preview
 
 const formState = ref({
-    // ===== Thông tin nhân sự (người đề nghị) =====
+    // nhân sự
     msnv: '',
     fullName: '',
     department: '',
     position: '',
 
-    // ===== Thông tin phiếu =====
-    docDate: dayjs(),        // Ngày phiếu
-    carrierName: '',         // Người mang ra cổng (text)
-    vehiclePlate: '',        // Biển số xe
-    itemName: '',            // Tên hàng hóa, vật tư
-    quantity: null,          // Số lượng
-    reason: '',              // Lý do
-    // ===== Thanh lý phế liệu =====
-    isScrapLiquidation: false,  // <— thêm dòng này
-    // ===== Phê duyệt =====
-    approverId: undefined    // Người ký duyệt (id)
+    // phiếu
+    docDate: dayjs(),
+    gatepassType: 'goods',      // 'goods' | 'scrap' | 'pottery'
+    carrierName: '',
+    vehiclePlate: '',
+    itemName: '',
+    quantity: null,
+    reason: '',
+
+    // giữ tương thích (preview cũ)
+    isScrapLiquidation: false,
+
+    // duyệt
+    approverId: undefined
 })
 
 const rules = {
     docDate: [{ required: true, message: 'Vui lòng chọn ngày phiếu' }],
+    gatepassType: [{ required: true, message: 'Vui lòng chọn loại phiếu' }],
     carrierName: [{ required: true, message: 'Vui lòng nhập người mang ra cổng' }],
     vehiclePlate: [{ required: true, message: 'Vui lòng nhập biển số xe' }],
     itemName: [{ required: true, message: 'Vui lòng nhập tên hàng hóa, vật tư' }],
@@ -159,7 +171,13 @@ const rules = {
     approverId: [{ required: true, message: 'Vui lòng chọn người ký duyệt' }]
 }
 
-// Điền info người đề nghị từ auth
+// đồng bộ cờ cũ
+watch(
+    () => formState.value.gatepassType,
+    (val) => { formState.value.isScrapLiquidation = (val === 'scrap') },
+    { immediate: true }
+)
+
 function fillEmployeeInfo() {
     formState.value.msnv = userAuth.user?.msnv || ''
     formState.value.fullName = userAuth.user?.name || ''
@@ -167,35 +185,33 @@ function fillEmployeeInfo() {
     formState.value.position = userAuth.user?.position?.name || ''
 }
 
-// Filter cho select dùng :options
-const filterByLabel = (input, option) =>
-    option?.label?.toLowerCase?.().includes(input.toLowerCase())
+const filterByLabel = (input, option) => option?.label?.toLowerCase?.().includes(input.toLowerCase())
 
 const onReset = () => {
-  formState.value = {
-    msnv: '',
-    fullName: '',
-    department: '',
-    position: '',
+    formState.value = {
+        msnv: '',
+        fullName: '',
+        department: '',
+        position: '',
 
-    docDate: dayjs(),
-    carrierName: '',
-    vehiclePlate: '',
-    itemName: '',
-    quantity: null,
-    reason: '',
+        docDate: dayjs(),
+        gatepassType: 'goods',
+        carrierName: '',
+        vehiclePlate: '',
+        itemName: '',
+        quantity: null,
+        reason: '',
 
-    isScrapLiquidation: false, // <— thêm dòng này
-
-    approverId: undefined
-  }
-  fillEmployeeInfo()
+        isScrapLiquidation: false,
+        approverId: undefined
+    }
+    fillEmployeeInfo()
 }
 
 const onSubmit = () => {
     formRef.value.validate()
         .then(() => { showPreview.value = true })
-        .catch(() => { /* AntD sẽ highlight lỗi */ })
+        .catch(() => { })
 }
 
 function normalizeUsersResponse(res) {
@@ -209,8 +225,6 @@ function normalizeUsersResponse(res) {
 
 onMounted(async () => {
     fillEmployeeInfo()
-
-    // Lấy toàn bộ users cho dropdown "Người ký duyệt" + preview tên người duyệt
     try {
         const res = await userService.getAll()
         const users = normalizeUsersResponse(res)
@@ -222,11 +236,9 @@ onMounted(async () => {
 
         userOptions.value = users.map(u => ({
             value: u.id,
-            label: [
-                u.name || u.full_name || u.username || '',
-                u.department?.name || u.department || '',
-                u.position?.name || u.position || ''
-            ].filter(Boolean).join(' - ')
+            label: [u.name || u.full_name || u.username || '', u.department?.name || u.department || '', u.position?.name || u.position || '']
+                .filter(Boolean)
+                .join(' - ')
         }))
     } catch (_) {
         approverUsers.value = []
