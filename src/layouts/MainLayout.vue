@@ -35,6 +35,9 @@
       <Footer />
     </a-layout>
   </a-layout>
+  <!-- 20/10 QUOC TE PHU NU -->
+  <RoseField :density="18" />
+  <SecretBoom :autoStartAfter="5" />
 </template>
 
 <script setup>
@@ -50,7 +53,8 @@ import {
 } from '@ant-design/icons-vue'
 import { useRouter } from 'vue-router'
 import FullScreenLoader from '@/components/FullScreenLoader.vue'
-
+import SecretBoom from '../components/2010/SecretBoom.vue'
+import RoseField from '@/components/2010/RoseField.vue'
 const isLoading = ref(false)
 const router = useRouter()
 const collapsed = ref(false)

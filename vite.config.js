@@ -15,7 +15,6 @@ export default defineConfig({
           'border-radius-base': '4px',
           // Có thể thêm các biến khác nếu muốn
         },
-        
       },
     },
   },

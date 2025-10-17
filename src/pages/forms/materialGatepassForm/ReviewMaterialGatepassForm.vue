@@ -117,7 +117,7 @@
                             <div class="signature">&nbsp;</div>
                         </td>
                         <td class="center">
-                            <strong>GĐX/ HCNS</strong>
+                            <strong>Hành chính nhân sự</strong>
                             <div class="sign-note">(Ký, ghi tên)</div>
                             <div class="signature">&nbsp;</div>
                         </td>

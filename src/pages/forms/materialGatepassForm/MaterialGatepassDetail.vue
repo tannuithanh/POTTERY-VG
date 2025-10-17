@@ -241,7 +241,7 @@
 
                         <!-- GĐX/HCNS (B2) -->
                         <td class="center">
-                            <strong>GĐX/ HCNS</strong>
+                            <strong>Hành chính nhân sự</strong>
                             <template v-if="canApproveStep2">
                                 <div class="signature" style="gap:10px; text-align:left; width:100%;">
                                     <template v-if="needNextApprover">
